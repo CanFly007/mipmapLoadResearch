@@ -16,6 +16,8 @@ public class AssetBundleLoader : MonoBehaviour
 {
     AssetBundle assetBundle;
 
+    public GameObject teaportGo;
+
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.A))
@@ -27,6 +29,14 @@ public class AssetBundleLoader : MonoBehaviour
         //    assetBundle.Unload(false);
         //}
         //
+
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            Texture texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture;
+            Texture2D texture2D = texture as Texture2D;
+            Debug.Log(texture2D.wrapMode);
+        }
+
 
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
@@ -50,7 +60,7 @@ public class AssetBundleLoader : MonoBehaviour
         assetBundle = DownloadHandlerAssetBundle.GetContent(uwr);
 
         Object asset = assetBundle.LoadAsset("TeapotPrefab");
-        Instantiate(asset);
+        teaportGo = Instantiate(asset) as GameObject;
 
         assetBundle.Unload(false);
     }
