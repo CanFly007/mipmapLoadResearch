@@ -14,57 +14,21 @@ public class ASBundleWrapper
 
 public class AssetBundleLoader : MonoBehaviour
 {
-    AssetBundle assetBundle;
-
-    public GameObject teaportGo;
+    private static int m_loadMipmapLevel = 0;
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            StartCoroutine(LoadAssetBundle());
-        }
-        //if (Input.GetKeyDown(KeyCode.U))
-        //{
-        //    assetBundle.Unload(false);
-        //}
-        //
-
-        if (Input.GetKeyDown(KeyCode.B))
-        {
-            Texture texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture;
-            Texture2D texture2D = texture as Texture2D;
-            Debug.Log(texture2D.wrapMode);
-        }
-
-
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
+            m_loadMipmapLevel = 0;
+            DeCompressBundleAsync().Forget();
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            m_loadMipmapLevel = 3;
             DeCompressBundleAsync().Forget();
         }
     }
-
-    IEnumerator LoadAssetBundle()
-    {
-        string assetBundlePath = Path.Combine(Application.streamingAssetsPath, "teaport");
-
-        UnityWebRequest uwr = UnityWebRequestAssetBundle.GetAssetBundle(assetBundlePath);
-        yield return uwr.SendWebRequest();
-
-        if (uwr.result != UnityWebRequest.Result.Success)
-        {
-            Debug.LogError("Failed to load AssetBundle: " + uwr.error);
-            yield break;
-        }
-
-        assetBundle = DownloadHandlerAssetBundle.GetContent(uwr);
-
-        Object asset = assetBundle.LoadAsset("TeapotPrefab");
-        teaportGo = Instantiate(asset) as GameObject;
-
-        assetBundle.Unload(false);
-    }
-
 
     async UniTaskVoid DeCompressBundleAsync()
     {
@@ -89,7 +53,7 @@ public class AssetBundleLoader : MonoBehaviour
             assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(filePath);
             await assetBundleCreateRequest;
 
-            AssetBundleRequest bundleRequest = assetBundleCreateRequest.assetBundle.LoadAllAssetsAsync();
+            AssetBundleRequest bundleRequest = assetBundleCreateRequest.assetBundle.LoadAllAssetsAsync(m_loadMipmapLevel);
             await bundleRequest;
 
             instance.Asset = bundleRequest.asset;
