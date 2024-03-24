@@ -16,6 +16,8 @@ public class AssetBundleLoader : MonoBehaviour
 {
     private static int m_loadMipmapLevel = 0;
 
+    private GameObject teaportGo;
+
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Alpha1))
@@ -28,6 +30,26 @@ public class AssetBundleLoader : MonoBehaviour
             m_loadMipmapLevel = 3;
             DeCompressBundleAsync().Forget();
         }
+
+        if (Input.GetKeyDown(KeyCode.Alpha9))
+        {
+            if (teaportGo != null)
+            {
+                Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
+                texture.ForceSetMipLevel(6);
+                //Debug.Log(texture.name);
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha0))
+        {
+            if (teaportGo != null)
+            {
+                Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
+                texture.ForceSetMipLevel(0);
+                //Debug.Log(texture.name);
+            }
+        }
     }
 
     async UniTaskVoid DeCompressBundleAsync()
@@ -35,7 +57,7 @@ public class AssetBundleLoader : MonoBehaviour
         string assetBundlePath = Path.Combine(Application.streamingAssetsPath, "teaport");
         ASBundleWrapper aSBundleWrapper = new ASBundleWrapper();
         await DeCompressBundle(aSBundleWrapper, 0, assetBundlePath);
-        Instantiate(aSBundleWrapper.Asset);
+        teaportGo = Instantiate(aSBundleWrapper.Asset) as GameObject;
     }
 
     //模仿ASBundleWrapper Load assetbundle
