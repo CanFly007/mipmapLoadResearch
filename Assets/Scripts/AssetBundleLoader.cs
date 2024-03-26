@@ -20,6 +20,8 @@ public class AssetBundleLoader : MonoBehaviour
 
     private static bool m_UnloadAB = true;
 
+    public Texture2D otherTex;
+
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Alpha1))
@@ -50,7 +52,7 @@ public class AssetBundleLoader : MonoBehaviour
                 //AssetBundle assetBundle = AssetBundle.LoadFromFile(assetBundlePath);
 
                 Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
-                texture.ForceSetMipLevel(6);
+                texture.ForceSetMipLevel(6,otherTex);
                 //Debug.Log(texture.name);
             }
         }
@@ -64,7 +66,7 @@ public class AssetBundleLoader : MonoBehaviour
                 //AssetBundle.LoadFromFile(assetBundlePath);
 
                 Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
-                texture.ForceSetMipLevel(0);
+                texture.ForceSetMipLevel(0, otherTex);
                 //Debug.Log(texture.name);
             }
         }
