@@ -1,7 +1,14 @@
 ManifestFileVersion: 0
-CRC: 3734515652
+CRC: 3497732058
 AssetBundleManifest:
   AssetBundleInfos:
     Info_0:
       Name: teaport
+      Dependencies:
+        Dependency_0: alientex
+    Info_1:
+      Name: othertexab
+      Dependencies: {}
+    Info_2:
+      Name: alientex
       Dependencies: {}

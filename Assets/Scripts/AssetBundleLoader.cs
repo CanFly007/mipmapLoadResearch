@@ -20,17 +20,45 @@ public class AssetBundleLoader : MonoBehaviour
 
     private static bool m_UnloadAB = true;
 
-    public Texture2D otherTex;
+    //public Texture2D otherTex;
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
+            AssetBundle texBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "alienTex"));
+            AssetBundle prefabBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "teaport"));
+            Object[] objects = prefabBundle.LoadAllAssets();
+            //for (int i = 0; i < objects.Length; i++)
+            {
+                teaportGo = Instantiate(objects[0] as GameObject);
+            }
+
+            prefabBundle.Unload(false);
+            texBundle.Unload(false);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            if (teaportGo != null)
+            {
+                AssetBundle assetBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "alienTex"));
+                Texture2D otherTex = assetBundle.LoadAsset<Texture2D>("alien_00_n_n_outfit_graffitiwriter_D", 5);
+
+                Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
+                texture.ForceSetMipLevel(5, otherTex);
+
+                assetBundle.Unload(false);
+            }
+        }
+
+
+        if (Input.GetKeyDown(KeyCode.Alpha5))
+        {
             m_loadMipmapLevel = 0;
             m_UnloadAB = true;
             DeCompressBundleAsync().Forget();
         }
-        if (Input.GetKeyDown(KeyCode.Alpha2))
+        if (Input.GetKeyDown(KeyCode.Alpha6))
         {
             m_loadMipmapLevel = 3;
             m_UnloadAB = true;
@@ -47,13 +75,13 @@ public class AssetBundleLoader : MonoBehaviour
         {
             if (teaportGo != null)
             {
-                ////test
-                //string assetBundlePath = Path.Combine(Application.streamingAssetsPath, "teaport");
-                //AssetBundle assetBundle = AssetBundle.LoadFromFile(assetBundlePath);
+                AssetBundle assetBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "othertexab"));
+                var otherTex = assetBundle.LoadAsset<Texture2D>("Amazing Speed_Floor_D", 5);
 
                 Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
-                texture.ForceSetMipLevel(6,otherTex);
-                //Debug.Log(texture.name);
+                texture.ForceSetMipLevel(5, otherTex);
+                
+                assetBundle.Unload(false);
             }
         }
 
@@ -61,13 +89,20 @@ public class AssetBundleLoader : MonoBehaviour
         {
             if (teaportGo != null)
             {
-                ////test
-                //string assetBundlePath = Path.Combine(Application.streamingAssetsPath, "teaport");
-                //AssetBundle.LoadFromFile(assetBundlePath);
+                AssetBundle assetBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "othertexab"));
+                var tex2D = assetBundle.LoadAsset<Texture2D>("Amazing Speed_Floor_D");
+                Debug.Log("other tex: " + tex2D.GetInstanceID());
+
 
                 Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
-                texture.ForceSetMipLevel(0, otherTex);
-                //Debug.Log(texture.name);
+                Debug.Log(texture.GetInstanceID());
+
+
+                texture.ForceSetMipLevel(0, tex2D);
+
+                Debug.Log("------");
+                Debug.Log(texture.GetInstanceID());
+                assetBundle.Unload(false);
             }
         }
 
@@ -94,6 +129,13 @@ public class AssetBundleLoader : MonoBehaviour
             }
         }
     }
+
+
+    //async UniTaskVoid LoadTeaportAsync()
+    //{ 
+        
+    //}
+
 
     async UniTaskVoid DeCompressBundleAsync()
     {

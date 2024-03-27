@@ -1,0 +1,17 @@
+ManifestFileVersion: 0
+CRC: 694192627
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 8f859e80ac00800d5456f7a3519fe092
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: b0363f7088f9761414f730641bf9a24b
+HashAppended: 0
+ClassTypes:
+- Class: 28
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/Texture/Amazing Speed_Floor_D.png
+Dependencies: []
