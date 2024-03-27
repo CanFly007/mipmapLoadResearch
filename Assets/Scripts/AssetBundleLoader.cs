@@ -47,7 +47,7 @@ public class AssetBundleLoader : MonoBehaviour
                 Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
                 texture.ForceSetMipLevel(5, otherTex);
 
-                assetBundle.Unload(false);
+                assetBundle.Unload(true);
             }
         }
 
