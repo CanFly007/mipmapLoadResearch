@@ -41,13 +41,15 @@ public class AssetBundleLoader : MonoBehaviour
         {
             if (teaportGo != null)
             {
-                AssetBundle assetBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "alienTex"));
-                Texture2D otherTex = assetBundle.LoadAsset<Texture2D>("alien_00_n_n_outfit_graffitiwriter_D", 5);
-
                 Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
-                texture.ForceSetMipLevel(5, otherTex);
 
-                assetBundle.Unload(true);
+                //AssetBundle assetBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "alienTex"));
+                //Texture2D otherTex = assetBundle.LoadAsset<Texture2D>(texture.name, 5);
+
+                //texture.ForceSetMipLevel(5, otherTex);
+                texture.ForceSetMipLevel(5, null, Path.Combine(Application.streamingAssetsPath, "alienTex"));
+
+                //assetBundle.Unload(true);
             }
         }
 
@@ -71,40 +73,40 @@ public class AssetBundleLoader : MonoBehaviour
             DeCompressBundleAsync().Forget();
         }
 
-        if (Input.GetKeyDown(KeyCode.Alpha9))
-        {
-            if (teaportGo != null)
-            {
-                AssetBundle assetBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "othertexab"));
-                var otherTex = assetBundle.LoadAsset<Texture2D>("Amazing Speed_Floor_D", 5);
+        //if (Input.GetKeyDown(KeyCode.Alpha9))
+        //{
+        //    if (teaportGo != null)
+        //    {
+        //        AssetBundle assetBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "othertexab"));
+        //        var otherTex = assetBundle.LoadAsset<Texture2D>("Amazing Speed_Floor_D", 5);
 
-                Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
-                texture.ForceSetMipLevel(5, otherTex);
+        //        Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
+        //        texture.ForceSetMipLevel(5, otherTex);
                 
-                assetBundle.Unload(false);
-            }
-        }
+        //        assetBundle.Unload(false);
+        //    }
+        //}
 
-        if (Input.GetKeyDown(KeyCode.Alpha0))
-        {
-            if (teaportGo != null)
-            {
-                AssetBundle assetBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "othertexab"));
-                var tex2D = assetBundle.LoadAsset<Texture2D>("Amazing Speed_Floor_D");
-                Debug.Log("other tex: " + tex2D.GetInstanceID());
-
-
-                Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
-                Debug.Log(texture.GetInstanceID());
+        //if (Input.GetKeyDown(KeyCode.Alpha0))
+        //{
+        //    if (teaportGo != null)
+        //    {
+        //        AssetBundle assetBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "othertexab"));
+        //        var tex2D = assetBundle.LoadAsset<Texture2D>("Amazing Speed_Floor_D");
+        //        Debug.Log("other tex: " + tex2D.GetInstanceID());
 
 
-                texture.ForceSetMipLevel(0, tex2D);
+        //        Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
+        //        Debug.Log(texture.GetInstanceID());
 
-                Debug.Log("------");
-                Debug.Log(texture.GetInstanceID());
-                assetBundle.Unload(false);
-            }
-        }
+
+        //        texture.ForceSetMipLevel(0, tex2D);
+
+        //        Debug.Log("------");
+        //        Debug.Log(texture.GetInstanceID());
+        //        assetBundle.Unload(false);
+        //    }
+        //}
 
         //GetPixel failed, because is not readable
         if (Input.GetKeyDown(KeyCode.G))
