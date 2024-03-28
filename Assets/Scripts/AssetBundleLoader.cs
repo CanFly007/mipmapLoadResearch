@@ -26,7 +26,7 @@ public class AssetBundleLoader : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            AssetBundle texBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "alienTex"));
+            //AssetBundle texBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "alienTex"));
             AssetBundle prefabBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "teaport"));
             Object[] objects = prefabBundle.LoadAllAssets();
             //for (int i = 0; i < objects.Length; i++)
@@ -35,7 +35,7 @@ public class AssetBundleLoader : MonoBehaviour
             }
             
             prefabBundle.Unload(false);
-            texBundle.Unload(false);
+            //texBundle.Unload(false);
         }
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
@@ -46,7 +46,8 @@ public class AssetBundleLoader : MonoBehaviour
                 //AssetBundle assetBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "alienTex"));
                 //Texture2D otherTex = assetBundle.LoadAsset<Texture2D>(texture.name, 5);
 
-                texture.ForceSetMipLevel(5, null, Path.Combine(Application.streamingAssetsPath, "alienTex"));
+                //texture.ForceSetMipLevel(5, null, Path.Combine(Application.streamingAssetsPath, "alienTex"));
+                texture.ForceSetMipLevel(5, null, Path.Combine(Application.streamingAssetsPath, "teaport"));
 
                 //assetBundle.Unload(true);
             }
