@@ -33,7 +33,7 @@ public class AssetBundleLoader : MonoBehaviour
             {
                 teaportGo = Instantiate(objects[0] as GameObject);
             }
-
+            
             prefabBundle.Unload(false);
             texBundle.Unload(false);
         }
@@ -46,11 +46,18 @@ public class AssetBundleLoader : MonoBehaviour
                 //AssetBundle assetBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "alienTex"));
                 //Texture2D otherTex = assetBundle.LoadAsset<Texture2D>(texture.name, 5);
 
-                //texture.ForceSetMipLevel(5, otherTex);
                 texture.ForceSetMipLevel(5, null, Path.Combine(Application.streamingAssetsPath, "alienTex"));
 
                 //assetBundle.Unload(true);
             }
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            AssetBundle texBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "alienTex"));            
+
+            AssetLoadParameters assetLoadParameters = new AssetLoadParameters { KeepMeshVertexData = false, MinimumMipLevelToLoad = 99 };
+            texBundle.LoadAsset("aaa", typeof(Texture2D), assetLoadParameters);
         }
 
 
