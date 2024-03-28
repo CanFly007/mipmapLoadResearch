@@ -18,134 +18,41 @@ public class AssetBundleLoader : MonoBehaviour
 
     private GameObject teaportGo;
 
-    private static bool m_UnloadAB = true;
-
     //public Texture2D otherTex;
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            //AssetBundle texBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "alienTex"));
-            AssetBundle prefabBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "teaport"));
-            Object[] objects = prefabBundle.LoadAllAssets();
-            //for (int i = 0; i < objects.Length; i++)
-            {
-                teaportGo = Instantiate(objects[0] as GameObject);
-            }
-            
-            prefabBundle.Unload(false);
-            //texBundle.Unload(false);
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha2))
+        if (Input.GetKeyDown(KeyCode.UpArrow))
         {
             if (teaportGo != null)
             {
                 Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
-
-                //AssetBundle assetBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "alienTex"));
-                //Texture2D otherTex = assetBundle.LoadAsset<Texture2D>(texture.name, 5);
-
-                //texture.ForceSetMipLevel(5, null, Path.Combine(Application.streamingAssetsPath, "alienTex"));
-                texture.ForceSetMipLevel(5, null, Path.Combine(Application.streamingAssetsPath, "teaport"));
-
-                //assetBundle.Unload(true);
+                m_loadMipmapLevel = Mathf.Clamp(++m_loadMipmapLevel, 0, texture.mipmapCount - 1);
+                texture.ForceSetMipLevel(m_loadMipmapLevel, Path.Combine(Application.streamingAssetsPath, "teaport"));
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            AssetBundle texBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "alienTex"));            
-
-            AssetLoadParameters assetLoadParameters = new AssetLoadParameters { KeepMeshVertexData = false, MinimumMipLevelToLoad = 99 };
-            texBundle.LoadAsset("aaa", typeof(Texture2D), assetLoadParameters);
-        }
-
-
-        if (Input.GetKeyDown(KeyCode.Alpha5))
-        {
-            m_loadMipmapLevel = 0;
-            m_UnloadAB = true;
-            DeCompressBundleAsync().Forget();
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha6))
-        {
-            m_loadMipmapLevel = 3;
-            m_UnloadAB = true;
-            DeCompressBundleAsync().Forget();
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            m_loadMipmapLevel = 0;
-            m_UnloadAB = false;
-            DeCompressBundleAsync().Forget();
-        }
-
-        //if (Input.GetKeyDown(KeyCode.Alpha9))
-        //{
-        //    if (teaportGo != null)
-        //    {
-        //        AssetBundle assetBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "othertexab"));
-        //        var otherTex = assetBundle.LoadAsset<Texture2D>("Amazing Speed_Floor_D", 5);
-
-        //        Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
-        //        texture.ForceSetMipLevel(5, otherTex);
-                
-        //        assetBundle.Unload(false);
-        //    }
-        //}
-
-        //if (Input.GetKeyDown(KeyCode.Alpha0))
-        //{
-        //    if (teaportGo != null)
-        //    {
-        //        AssetBundle assetBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "othertexab"));
-        //        var tex2D = assetBundle.LoadAsset<Texture2D>("Amazing Speed_Floor_D");
-        //        Debug.Log("other tex: " + tex2D.GetInstanceID());
-
-
-        //        Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
-        //        Debug.Log(texture.GetInstanceID());
-
-
-        //        texture.ForceSetMipLevel(0, tex2D);
-
-        //        Debug.Log("------");
-        //        Debug.Log(texture.GetInstanceID());
-        //        assetBundle.Unload(false);
-        //    }
-        //}
-
-        //GetPixel failed, because is not readable
-        if (Input.GetKeyDown(KeyCode.G))
+        if (Input.GetKeyDown(KeyCode.DownArrow))
         {
             if (teaportGo != null)
             {
                 Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
-                Color c = texture.GetPixel(0, 0);
-                Debug.Log(c);
+                m_loadMipmapLevel = Mathf.Clamp(--m_loadMipmapLevel, 0, texture.mipmapCount - 1);
+                texture.ForceSetMipLevel(m_loadMipmapLevel, Path.Combine(Application.streamingAssetsPath, "teaport"));
             }
         }
 
-        //test LoadAB direct not async
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            m_loadMipmapLevel = 0;
+            DeCompressBundleAsync().Forget();
+        }
         if (Input.GetKeyDown(KeyCode.L))
         {
-            string assetBundlePath = Path.Combine(Application.streamingAssetsPath, "teaport");
-            AssetBundle ab = AssetBundle.LoadFromFile(assetBundlePath);
-            Object[] objects = ab.LoadAllAssets();
-            for (int i = 0; i < objects.Length; i++)
-            {
-                teaportGo = Instantiate(objects[i] as GameObject);
-            }
+            m_loadMipmapLevel = 10;
+            DeCompressBundleAsync().Forget();
         }
     }
-
-
-    //async UniTaskVoid LoadTeaportAsync()
-    //{ 
-        
-    //}
-
 
     async UniTaskVoid DeCompressBundleAsync()
     {
@@ -170,7 +77,7 @@ public class AssetBundleLoader : MonoBehaviour
             assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(filePath);
             await assetBundleCreateRequest;
 
-            AssetBundleRequest bundleRequest = assetBundleCreateRequest.assetBundle.LoadAllAssetsAsync(m_loadMipmapLevel);
+            AssetBundleRequest bundleRequest = assetBundleCreateRequest.assetBundle.LoadAllAssetsAsync(new AssetLoadParameters(false, m_loadMipmapLevel));
             await bundleRequest;
 
             instance.Asset = bundleRequest.asset;
@@ -179,7 +86,6 @@ public class AssetBundleLoader : MonoBehaviour
         catch
         { 
         }
-        if(m_UnloadAB)
-            assetBundleCreateRequest.assetBundle.Unload(false);
+        assetBundleCreateRequest.assetBundle.Unload(false);
     }
 }
