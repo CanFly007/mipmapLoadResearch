@@ -20,7 +20,7 @@ public class AssetBundleBuilder : MonoBehaviour
         BuildPipeline.BuildAssetBundles(assetBundleDirectory, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
         //android
         //BuildPipeline.BuildAssetBundles(assetBundleDirectory, BuildAssetBundleOptions.None, BuildTarget.Android);
-
+        Debug.Log("Build ab finished");
         //UnwrapParam
     }
 }

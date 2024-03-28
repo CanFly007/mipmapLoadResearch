@@ -27,7 +27,7 @@ public class AssetBundleLoader : MonoBehaviour
             if (teaportGo != null)
             {
                 Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
-                m_loadMipmapLevel = Mathf.Clamp(++m_loadMipmapLevel, 0, texture.mipmapCount - 1);
+                m_loadMipmapLevel = Mathf.Clamp(--m_loadMipmapLevel, 0, texture.mipmapCount - 1);
                 texture.ForceSetMipLevel(m_loadMipmapLevel, Path.Combine(Application.streamingAssetsPath, "teaport"));
             }
         }
@@ -37,7 +37,7 @@ public class AssetBundleLoader : MonoBehaviour
             if (teaportGo != null)
             {
                 Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
-                m_loadMipmapLevel = Mathf.Clamp(--m_loadMipmapLevel, 0, texture.mipmapCount - 1);
+                m_loadMipmapLevel = Mathf.Clamp(++m_loadMipmapLevel, 0, texture.mipmapCount - 1);
                 texture.ForceSetMipLevel(m_loadMipmapLevel, Path.Combine(Application.streamingAssetsPath, "teaport"));
             }
         }
