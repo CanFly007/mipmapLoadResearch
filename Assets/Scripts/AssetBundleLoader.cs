@@ -58,9 +58,11 @@ public class AssetBundleLoader : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (teaportGo)
-            {
+            {                
                 DestroyImmediate(teaportGo);
+                teaportGo = null;
             }
+            Resources.UnloadUnusedAssets();
         }
     }
 
