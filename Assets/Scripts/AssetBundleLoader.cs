@@ -26,10 +26,10 @@ public class AssetBundleLoader : MonoBehaviour
         {
             if (teaportGo != null)
             {
-                Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
-                //m_loadMipmapLevel = Mathf.Clamp(--m_loadMipmapLevel, 0, texture.mipmapCount - 1);
+                //Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
                 --m_loadMipmapLevel;
-                texture.ForceSetMipLevel(m_loadMipmapLevel, Path.Combine(Application.streamingAssetsPath, "teaport"));
+                StartCoroutine(ForceSetMipLevel(m_loadMipmapLevel));
+                //texture.ForceSetMipLevel(m_loadMipmapLevel, Path.Combine(Application.streamingAssetsPath, "teaport"));
             }
         }
 
@@ -37,10 +37,10 @@ public class AssetBundleLoader : MonoBehaviour
         {
             if (teaportGo != null)
             {
-                Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
-                //m_loadMipmapLevel = Mathf.Clamp(++m_loadMipmapLevel, 0, texture.mipmapCount - 1);
+                //Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
                 ++m_loadMipmapLevel;
-                texture.ForceSetMipLevel(m_loadMipmapLevel, Path.Combine(Application.streamingAssetsPath, "teaport"));
+                StartCoroutine(ForceSetMipLevel(m_loadMipmapLevel));
+                //texture.ForceSetMipLevel(m_loadMipmapLevel, Path.Combine(Application.streamingAssetsPath, "teaport"));
             }
         }
 
@@ -99,5 +99,17 @@ public class AssetBundleLoader : MonoBehaviour
         { 
         }
         assetBundleCreateRequest.assetBundle.Unload(false);
+    }
+
+    IEnumerator ForceSetMipLevel(int mipmapLevel)
+    {
+        Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
+
+        AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(Path.Combine(Application.streamingAssetsPath, "teaport"));
+        yield return assetBundleCreateRequest;
+
+        texture.ForceSetMipLevel(m_loadMipmapLevel, "");
+
+        assetBundleCreateRequest.assetBundle.Unload(true);
     }
 }
