@@ -1,0 +1,11 @@
+ManifestFileVersion: 0
+CRC: 4041115623
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: teaport
+      Dependencies:
+        Dependency_0: alientex
+    Info_1:
+      Name: alientex
+      Dependencies: {}

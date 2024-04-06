@@ -3,7 +3,7 @@ CRC: 2868377104
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 56b5e5c0ede2241f54909939a9510657
+    Hash: 401a442f50dcd7ae56177ff47d439692
   TypeTreeHash:
     serializedVersion: 2
     Hash: c31af75079f831b04b55fc6ad0a01bd2
@@ -29,4 +29,4 @@ SerializeReferenceClassIdentifiers: []
 Assets:
 - Assets/Model/TeapotPrefab.prefab
 Dependencies:
-- E:/202312/MipmapLoadResearch/Assets/StreamingAssets/alientex
+- D:/202403/mipmapLoadResearch/Assets/StreamingAssets/alientex

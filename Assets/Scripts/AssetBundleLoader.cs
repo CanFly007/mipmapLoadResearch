@@ -18,32 +18,31 @@ public class AssetBundleLoader : MonoBehaviour
 
     private GameObject teaportGo;
 
-    //public Texture2D otherTex;
-
     public Texture2D testInsteadABTex;
-    private byte[] myBytes;
-
     public Texture2D anotherNullTex;
     public Material insteadABMat;
+    private string filePath = Path.Combine(Application.streamingAssetsPath, "mybytes");
+
 
     private void OnDestroy()
     {
         insteadABMat.mainTexture = null;
+        File.Delete(filePath);
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Q))
+        if (Input.GetKeyDown(KeyCode.Q)) //runtime or build ab
         {
-            myBytes = testInsteadABTex.GetStreamedBinaryData(false); //save to myBytes
-            var s = 1 + 1;
+            byte[] myBytes = testInsteadABTex.GetStreamedBinaryData(false); //save to myBytes
+            File.WriteAllBytes(filePath, myBytes);
         }
         if(Input.GetKeyDown(KeyCode.W))
         {
+            byte[] myBytes = File.ReadAllBytes(filePath);
             anotherNullTex = new Texture2D(512, 512);
             anotherNullTex.SetStreamedBinaryData(myBytes);
             insteadABMat.mainTexture = anotherNullTex;
-            var s = 1 + 1;
         }
 
 
