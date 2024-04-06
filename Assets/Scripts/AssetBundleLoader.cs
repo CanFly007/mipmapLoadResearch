@@ -22,13 +22,37 @@ public class AssetBundleLoader : MonoBehaviour
 
     void Update()
     {
+        //return back to texture independence package
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            AssetBundle texBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "alienTex"));
+            AssetBundle prefabBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "teaport"));
+            
+            Object[] objects = prefabBundle.LoadAllAssets();
+            teaportGo = Instantiate(objects[0] as GameObject);
+
+            prefabBundle.Unload(false);
+            texBundle.Unload(false);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
+            
+            AssetBundle texBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "alienTex"));
+            texture.ForceSetMipLevel(7, null);
+            texBundle.Unload(true);  //why can do this? forceSetMip is async???
+        }
+
+        AnimationClip animationClip;
+
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
             if (teaportGo != null)
             {
                 //Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
                 --m_loadMipmapLevel;
-                StartCoroutine(ForceSetMipLevel(m_loadMipmapLevel));
+                string path = Path.Combine(Application.streamingAssetsPath, "teaport");
+                StartCoroutine(ForceSetMipLevel(m_loadMipmapLevel, path));
                 //texture.ForceSetMipLevel(m_loadMipmapLevel, Path.Combine(Application.streamingAssetsPath, "teaport"));
             }
         }
@@ -39,8 +63,8 @@ public class AssetBundleLoader : MonoBehaviour
             {
                 //Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
                 ++m_loadMipmapLevel;
-                StartCoroutine(ForceSetMipLevel(m_loadMipmapLevel));
-                //texture.ForceSetMipLevel(m_loadMipmapLevel, Path.Combine(Application.streamingAssetsPath, "teaport"));
+                string path = Path.Combine(Application.streamingAssetsPath, "teaport");
+                StartCoroutine(ForceSetMipLevel(m_loadMipmapLevel, path));
             }
         }
 
@@ -101,14 +125,17 @@ public class AssetBundleLoader : MonoBehaviour
         assetBundleCreateRequest.assetBundle.Unload(false);
     }
 
-    IEnumerator ForceSetMipLevel(int mipmapLevel)
+    IEnumerator ForceSetMipLevel(int mipmapLevel,string abPath)
     {
         Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
 
-        AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(Path.Combine(Application.streamingAssetsPath, "teaport"));
+        AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(abPath);
         yield return assetBundleCreateRequest;
 
+        //AssetBundle assetBundle = AssetBundle.LoadFromFile(abPath);
         texture.ForceSetMipLevel(m_loadMipmapLevel, "");
+        //assetBundle.Unload(true);
+        //yield return null;
 
         assetBundleCreateRequest.assetBundle.Unload(true);
     }

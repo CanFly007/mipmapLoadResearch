@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 1134562798
+CRC: 2868377104
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: f31cc01a91e288f723c4daa321c6c471
+    Hash: 56b5e5c0ede2241f54909939a9510657
   TypeTreeHash:
     serializedVersion: 2
     Hash: c31af75079f831b04b55fc6ad0a01bd2
@@ -28,4 +28,5 @@ ClassTypes:
 SerializeReferenceClassIdentifiers: []
 Assets:
 - Assets/Model/TeapotPrefab.prefab
-Dependencies: []
+Dependencies:
+- E:/202312/MipmapLoadResearch/Assets/StreamingAssets/alientex
