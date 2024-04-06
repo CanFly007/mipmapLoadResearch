@@ -20,8 +20,34 @@ public class AssetBundleLoader : MonoBehaviour
 
     //public Texture2D otherTex;
 
+    public Texture2D testInsteadABTex;
+    private byte[] myBytes;
+
+    public Texture2D anotherNullTex;
+    public Material insteadABMat;
+
+    private void OnDestroy()
+    {
+        insteadABMat.mainTexture = null;
+    }
+
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            myBytes = testInsteadABTex.GetStreamedBinaryData(false); //save to myBytes
+            var s = 1 + 1;
+        }
+        if(Input.GetKeyDown(KeyCode.W))
+        {
+            anotherNullTex = new Texture2D(512, 512);
+            anotherNullTex.SetStreamedBinaryData(myBytes);
+            insteadABMat.mainTexture = anotherNullTex;
+            var s = 1 + 1;
+        }
+
+
+
         //return back to texture independence package
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
