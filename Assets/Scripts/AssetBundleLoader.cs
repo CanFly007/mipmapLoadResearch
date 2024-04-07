@@ -18,31 +18,48 @@ public class AssetBundleLoader : MonoBehaviour
 
     private GameObject teaportGo;
 
-    public Texture2D testInsteadABTex;
+    //public Texture2D testInsteadABTex;
     public Texture2D anotherNullTex;
     public Material insteadABMat;
-    private string filePath = Path.Combine(Application.streamingAssetsPath, "mybytes");
+    private string folderPath = Path.Combine(Application.streamingAssetsPath, "mybytes");
 
 
     private void OnDestroy()
     {
         insteadABMat.mainTexture = null;
-        File.Delete(filePath);
+        //if (Directory.Exists(folderPath))
+        //{
+        //    string[] files = Directory.GetFiles(folderPath);
+        //    foreach (string file in files)
+        //    {
+        //        File.Delete(file);
+        //    }
+        //}
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Q)) //runtime or build ab
+        //if (Input.GetKeyDown(KeyCode.Q)) //runtime or build ab
+        //{
+        //    byte[] myBytes = testInsteadABTex.GetStreamedBinaryData(false); //save to myBytes 
+        //    File.WriteAllBytes(folderPath + "/_ld", myBytes);
+
+        //    byte[] myBytes2 = testInsteadABTex.GetStreamedBinaryData(true); //save to myBytes 
+        //    File.WriteAllBytes(folderPath + "/_hd", myBytes2);
+        //}
+
+        if(Input.GetKeyDown(KeyCode.W))  //256、128、64、32、16、8、4、2、1共9部分，共43704 字节
         {
-            byte[] myBytes = testInsteadABTex.GetStreamedBinaryData(false); //save to myBytes
-            File.WriteAllBytes(filePath, myBytes);
-        }
-        if(Input.GetKeyDown(KeyCode.W))
-        {
-            byte[] myBytes = File.ReadAllBytes(filePath);
+            byte[] myBytes = File.ReadAllBytes(folderPath + "/_ld");
             anotherNullTex = new Texture2D(512, 512);
-            anotherNullTex.SetStreamedBinaryData(myBytes);
+            anotherNullTex.SetStreamedBinaryData(myBytes,0); //first?
             insteadABMat.mainTexture = anotherNullTex;
+        }
+        //bytes_h是后面的高清图，即2048、1024、512部分，共2752512 字节
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            byte[] myBytes = File.ReadAllBytes(folderPath + "/_hd");
+            anotherNullTex.SetStreamedBinaryData(myBytes,1); //append?
         }
 
 
