@@ -18,8 +18,7 @@ public class AssetBundleLoader : MonoBehaviour
 
     private GameObject teaportGo;
 
-    //public Texture2D testInsteadABTex;
-    public Texture2D anotherNullTex;
+    public Texture2D placeholderTex;
     public Material insteadABMat;
     public string baseFileName = "Amazing Speed_Floor_D_ld";
     private string folderPath;
@@ -37,18 +36,18 @@ public class AssetBundleLoader : MonoBehaviour
     void Update()
     {
         //Step2 绕过AB，使用二进制代替
-        if(Input.GetKeyDown(KeyCode.W))
+        if(Input.GetKeyDown(KeyCode.Alpha1))
         {
             string lowDefFileName = baseFileName;
             string lowDefFilePath = Path.Combine(folderPath, lowDefFileName + ".bytes");
 
             byte[] ldBytes = File.ReadAllBytes(lowDefFilePath);
-            anotherNullTex = new Texture2D(512, 512);
-            anotherNullTex.SetStreamedBinaryData(ldBytes, true); //first?
-            insteadABMat.mainTexture = anotherNullTex;
+            placeholderTex = new Texture2D(8, 8);
+            placeholderTex.SetStreamedBinaryData(ldBytes, true); //first?
+            insteadABMat.mainTexture = placeholderTex;
         }
         
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             string highDefFileName = baseFileName;
             if (baseFileName.EndsWith("_ld"))
@@ -56,7 +55,21 @@ public class AssetBundleLoader : MonoBehaviour
             string highDefFilePath = Path.Combine(folderPath, highDefFileName + ".bytes");
 
             byte[] hdBytes = File.ReadAllBytes(highDefFilePath);
-            anotherNullTex.SetStreamedBinaryData(hdBytes, false); //append?
+            placeholderTex.SetStreamedBinaryData(hdBytes, false); //append?
+        }
+
+        //测试只加载hd包的效果
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            string highDefFileName = baseFileName;
+            if (baseFileName.EndsWith("_ld"))
+                highDefFileName = baseFileName.Substring(0, baseFileName.Length - 3) + "_hd";
+            string highDefFilePath = Path.Combine(folderPath, highDefFileName + ".bytes");
+
+            byte[] hdBytes = File.ReadAllBytes(highDefFilePath);
+            placeholderTex = new Texture2D(8, 8);
+            placeholderTex.SetStreamedBinaryData(hdBytes, true); //直接Load HD
+            insteadABMat.mainTexture = placeholderTex;
         }
 
 

@@ -22,6 +22,8 @@ public class AssetBundleBuilder
         AssetDatabase.Refresh();
     }
 
+    public static int splitMipLevel = 6;
+
     [MenuItem("Assets/Build Texture Binary", false, 0)]
     static void BuildBinary()
     {
@@ -55,8 +57,8 @@ public class AssetBundleBuilder
 
     public static void SerializationToBytes(Texture2D texture2D, string folderPath)
     {
-        byte[] lowResBytes = texture2D.GetStreamedBinaryData(false, 6);// For low quality texture
-        byte[] highResBytes = texture2D.GetStreamedBinaryData(true, 6); // For high quality texture
+        byte[] lowResBytes = texture2D.GetStreamedBinaryData(false, splitMipLevel);// For low quality texture
+        byte[] highResBytes = texture2D.GetStreamedBinaryData(true, splitMipLevel); // For high quality texture
 
         string lowResFilePath = Path.Combine(folderPath, texture2D.name + "_ld.bytes");
         string highResFilePath = Path.Combine(folderPath, texture2D.name + "_hd.bytes");
