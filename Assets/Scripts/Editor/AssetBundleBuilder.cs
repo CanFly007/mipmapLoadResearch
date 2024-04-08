@@ -4,7 +4,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-public class AssetBundleBuilder : MonoBehaviour
+public class AssetBundleBuilder
 {
     [MenuItem("Custom/Build AssetBundle")]
     static void BuildAssetBundle()
@@ -18,51 +18,50 @@ public class AssetBundleBuilder : MonoBehaviour
 
         //win
         BuildPipeline.BuildAssetBundles(assetBundleDirectory, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
-        //android
-        //BuildPipeline.BuildAssetBundles(assetBundleDirectory, BuildAssetBundleOptions.None, BuildTarget.Android);
         Debug.Log("Build ab finished");
+        AssetDatabase.Refresh();
     }
 
-    [MenuItem("Custom/Build Binary")]
+    [MenuItem("Assets/Build Texture Binary", false, 0)]
     static void BuildBinary()
     {
-        string assetBundleDirectory = "Assets/StreamingAssets";
-
-        if (!System.IO.Directory.Exists(assetBundleDirectory))
+        string folderPath = Path.Combine(Application.dataPath, "TextureBytes");
+        if (!Directory.Exists(folderPath))
         {
-            System.IO.Directory.CreateDirectory(assetBundleDirectory);
+            Directory.CreateDirectory(folderPath);
         }
-
-        if (Selection.activeObject is Texture2D == false)
+        else
         {
-            Debug.LogError("Not tex2D");
+            DirectoryInfo di = new DirectoryInfo(folderPath);
+            foreach (FileInfo file in di.GetFiles())
+            {
+                file.Delete();
+            }
+        }
+        if (!(Selection.activeObject is Texture2D))
+        {
+            Debug.LogError("Selected object is not a Texture2D.");
             return;
         }
 
         Texture2D tex2D = Selection.activeObject as Texture2D;
-        Debug.Log(tex2D.name);
-        string filePath = Path.Combine(Application.streamingAssetsPath, "mybytes");
-        SerizationToBytes(tex2D, filePath);
-        Debug.Log("Build binary finished");
-        tex2D = null;
+        SerializationToBytes(tex2D, folderPath);
+        Debug.Log("Build binary: " + tex2D.name + " finished.");
+
+        // Clean up
         EditorUtility.UnloadUnusedAssetsImmediate();
+        AssetDatabase.Refresh();
     }
 
-    //runtime or build ab
-    public static void SerizationToBytes(Texture2D texture2D, string filePath)
+    public static void SerializationToBytes(Texture2D texture2D, string folderPath)
     {
-        //byte[] myBytes = texture2D.GetStreamedBinaryData(false); //save to myBytes
-        //File.WriteAllBytes(filePath, myBytes);
+        byte[] lowResBytes = texture2D.GetStreamedBinaryData(false, 6);// For low quality texture
+        byte[] highResBytes = texture2D.GetStreamedBinaryData(true, 6); // For high quality texture
 
+        string lowResFilePath = Path.Combine(folderPath, texture2D.name + "_ld.bytes");
+        string highResFilePath = Path.Combine(folderPath, texture2D.name + "_hd.bytes");
 
-        byte[] myBytes = texture2D.GetStreamedBinaryData(false); //save to myBytes 
-        File.WriteAllBytes(folderPath + "/_ld", myBytes);
-
-        byte[] myBytes2 = texture2D.GetStreamedBinaryData(true); //save to myBytes 
-        File.WriteAllBytes(folderPath + "/_hd", myBytes2);
-
-        texture2D = null;
+        File.WriteAllBytes(lowResFilePath, lowResBytes);
+        File.WriteAllBytes(highResFilePath, highResBytes);
     }
-
-    private static string folderPath = Path.Combine(Application.streamingAssetsPath, "mybytes");
 }

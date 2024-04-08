@@ -21,51 +21,48 @@ public class AssetBundleLoader : MonoBehaviour
     //public Texture2D testInsteadABTex;
     public Texture2D anotherNullTex;
     public Material insteadABMat;
-    private string folderPath = Path.Combine(Application.streamingAssetsPath, "mybytes");
+    public string baseFileName = "Amazing Speed_Floor_D_ld";
+    private string folderPath;
 
+    private void Awake()
+    {
+        folderPath = Path.Combine(Application.dataPath, "TextureBytes");
+    }
 
     private void OnDestroy()
     {
         insteadABMat.mainTexture = null;
-        //if (Directory.Exists(folderPath))
-        //{
-        //    string[] files = Directory.GetFiles(folderPath);
-        //    foreach (string file in files)
-        //    {
-        //        File.Delete(file);
-        //    }
-        //}
     }
 
     void Update()
     {
-        //if (Input.GetKeyDown(KeyCode.Q)) //runtime or build ab
-        //{
-        //    byte[] myBytes = testInsteadABTex.GetStreamedBinaryData(false); //save to myBytes 
-        //    File.WriteAllBytes(folderPath + "/_ld", myBytes);
-
-        //    byte[] myBytes2 = testInsteadABTex.GetStreamedBinaryData(true); //save to myBytes 
-        //    File.WriteAllBytes(folderPath + "/_hd", myBytes2);
-        //}
-
-        if(Input.GetKeyDown(KeyCode.W))  //256、128、64、32、16、8、4、2、1共9部分，共43704 字节
+        //Step2 绕过AB，使用二进制代替
+        if(Input.GetKeyDown(KeyCode.W))
         {
-            byte[] myBytes = File.ReadAllBytes(folderPath + "/_ld");
+            string lowDefFileName = baseFileName;
+            string lowDefFilePath = Path.Combine(folderPath, lowDefFileName + ".bytes");
+
+            byte[] ldBytes = File.ReadAllBytes(lowDefFilePath);
             anotherNullTex = new Texture2D(512, 512);
-            anotherNullTex.SetStreamedBinaryData(myBytes,0); //first?
+            anotherNullTex.SetStreamedBinaryData(ldBytes, true); //first?
             insteadABMat.mainTexture = anotherNullTex;
         }
-        //bytes_h是后面的高清图，即2048、1024、512部分，共2752512 字节
+        
         if (Input.GetKeyDown(KeyCode.E))
         {
-            byte[] myBytes = File.ReadAllBytes(folderPath + "/_hd");
-            anotherNullTex.SetStreamedBinaryData(myBytes,1); //append?
+            string highDefFileName = baseFileName;
+            if (baseFileName.EndsWith("_ld"))
+                highDefFileName = baseFileName.Substring(0, baseFileName.Length - 3) + "_hd";
+            string highDefFilePath = Path.Combine(folderPath, highDefFileName + ".bytes");
+
+            byte[] hdBytes = File.ReadAllBytes(highDefFilePath);
+            anotherNullTex.SetStreamedBinaryData(hdBytes, false); //append?
         }
 
 
 
-        //return back to texture independence package
-        if (Input.GetKeyDown(KeyCode.Alpha1))
+        //Step1 贴图和prefab分开打AB包，纹理是一个单独的AB包
+        if (Input.GetKeyDown(KeyCode.H))
         {
             AssetBundle texBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "alienTex"));
             AssetBundle prefabBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "teaport"));
@@ -76,26 +73,25 @@ public class AssetBundleLoader : MonoBehaviour
             prefabBundle.Unload(false);
             texBundle.Unload(false);
         }
-        if (Input.GetKeyDown(KeyCode.Alpha2))
+        if (Input.GetKeyDown(KeyCode.L))
         {
-            Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
-            
             AssetBundle texBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "alienTex"));
-            texture.ForceSetMipLevel(7, null);
-            texBundle.Unload(true);  //why can do this? forceSetMip is async???
-        }
+            AssetBundle prefabBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "teaport"));
 
-        AnimationClip animationClip;
+            Object[] objects = prefabBundle.LoadAllAssets(new AssetLoadParameters(false, 6));
+            teaportGo = Instantiate(objects[0] as GameObject);
+
+            prefabBundle.Unload(false);
+            texBundle.Unload(false);
+        }
 
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
             if (teaportGo != null)
             {
-                //Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
                 --m_loadMipmapLevel;
-                string path = Path.Combine(Application.streamingAssetsPath, "teaport");
+                string path = Path.Combine(Application.streamingAssetsPath, "alienTex");
                 StartCoroutine(ForceSetMipLevel(m_loadMipmapLevel, path));
-                //texture.ForceSetMipLevel(m_loadMipmapLevel, Path.Combine(Application.streamingAssetsPath, "teaport"));
             }
         }
 
@@ -103,22 +99,10 @@ public class AssetBundleLoader : MonoBehaviour
         {
             if (teaportGo != null)
             {
-                //Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
                 ++m_loadMipmapLevel;
-                string path = Path.Combine(Application.streamingAssetsPath, "teaport");
+                string path = Path.Combine(Application.streamingAssetsPath, "alienTex");
                 StartCoroutine(ForceSetMipLevel(m_loadMipmapLevel, path));
             }
-        }
-
-        if (Input.GetKeyDown(KeyCode.H))
-        {
-            m_loadMipmapLevel = 0;
-            DeCompressBundleAsync().Forget();
-        }
-        if (Input.GetKeyDown(KeyCode.L))
-        {
-            m_loadMipmapLevel = 10;
-            DeCompressBundleAsync().Forget();
         }
 
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -132,41 +116,6 @@ public class AssetBundleLoader : MonoBehaviour
         }
     }
 
-    async UniTaskVoid DeCompressBundleAsync()
-    {
-        string assetBundlePath = Path.Combine(Application.streamingAssetsPath, "teaport");
-        ASBundleWrapper aSBundleWrapper = new ASBundleWrapper();
-        await DeCompressBundle(aSBundleWrapper, 0, assetBundlePath);
-        teaportGo = Instantiate(aSBundleWrapper.Asset) as GameObject;
-    }
-
-    //模仿ASBundleWrapper Load assetbundle
-    static async UniTask DeCompressBundle(ASBundleWrapper instance, int downResult, string filePath)
-    {
-        AssetBundleCreateRequest assetBundleCreateRequest = null;
-        try
-        {
-            if (!File.Exists(filePath))
-            {
-                Debug.LogError($"not found {filePath},but downLoad file result is success.Uri:");
-                return;
-            }
-
-            assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(filePath);
-            await assetBundleCreateRequest;
-
-            AssetBundleRequest bundleRequest = assetBundleCreateRequest.assetBundle.LoadAllAssetsAsync(new AssetLoadParameters(false, m_loadMipmapLevel));
-            await bundleRequest;
-
-            instance.Asset = bundleRequest.asset;
-            instance.AllAsset = bundleRequest.allAssets;
-        }
-        catch
-        { 
-        }
-        assetBundleCreateRequest.assetBundle.Unload(false);
-    }
-
     IEnumerator ForceSetMipLevel(int mipmapLevel,string abPath)
     {
         Texture2D texture = teaportGo.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
@@ -174,11 +123,7 @@ public class AssetBundleLoader : MonoBehaviour
         AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(abPath);
         yield return assetBundleCreateRequest;
 
-        //AssetBundle assetBundle = AssetBundle.LoadFromFile(abPath);
         texture.ForceSetMipLevel(m_loadMipmapLevel, "");
-        //assetBundle.Unload(true);
-        //yield return null;
-
         assetBundleCreateRequest.assetBundle.Unload(true);
     }
 }
