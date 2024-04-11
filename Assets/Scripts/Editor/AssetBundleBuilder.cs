@@ -27,7 +27,7 @@ public class AssetBundleBuilder
     [MenuItem("Assets/Build Texture Binary", false, 0)]
     static void BuildBinary()
     {
-        string folderPath = Path.Combine(Application.dataPath, "TextureBytes");
+        string folderPath = Path.Combine(Application.streamingAssetsPath, "TextureBytes");
         if (!Directory.Exists(folderPath))
         {
             Directory.CreateDirectory(folderPath);

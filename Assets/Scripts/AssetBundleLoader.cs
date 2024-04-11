@@ -25,7 +25,7 @@ public class AssetBundleLoader : MonoBehaviour
 
     private void Awake()
     {
-        folderPath = Path.Combine(Application.dataPath, "TextureBytes");
+        folderPath = Path.Combine(Application.streamingAssetsPath, "TextureBytes");
     }
 
     private void OnDestroy()
@@ -36,29 +36,84 @@ public class AssetBundleLoader : MonoBehaviour
     void Update()
     {
         //Step2 绕过AB，使用二进制代替
-        if(Input.GetKeyDown(KeyCode.Alpha1))
+        if(Input.GetKeyDown(KeyCode.L))
         {
             string lowDefFileName = baseFileName;
             string lowDefFilePath = Path.Combine(folderPath, lowDefFileName + ".bytes");
 
+            if (placeholderTex == null)
+            {
+                placeholderTex = new Texture2D(8, 8);
+                insteadABMat.mainTexture = placeholderTex;
+            }
+
             byte[] ldBytes = File.ReadAllBytes(lowDefFilePath);
-            placeholderTex = new Texture2D(8, 8);
-            placeholderTex.SetStreamedBinaryData(ldBytes, true); //first?
-            insteadABMat.mainTexture = placeholderTex;
+            placeholderTex.SetStreamedBinaryData(ldBytes, true); 
         }
         
-        if (Input.GetKeyDown(KeyCode.Alpha2))
+        if (Input.GetKeyDown(KeyCode.H))
         {
             string highDefFileName = baseFileName;
             if (baseFileName.EndsWith("_ld"))
                 highDefFileName = baseFileName.Substring(0, baseFileName.Length - 3) + "_hd";
             string highDefFilePath = Path.Combine(folderPath, highDefFileName + ".bytes");
 
+            if (placeholderTex == null)
+            {
+                placeholderTex = new Texture2D(8, 8);
+                insteadABMat.mainTexture = placeholderTex;
+            }
+
             byte[] hdBytes = File.ReadAllBytes(highDefFilePath);
-            placeholderTex.SetStreamedBinaryData(hdBytes, false); //append?
+            placeholderTex.SetStreamedBinaryData(hdBytes, false); 
         }
 
-        //测试只加载hd包的效果
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (placeholderTex)
+            {
+                DestroyImmediate(placeholderTex);
+                placeholderTex = null;
+            }
+            insteadABMat.mainTexture = null;
+        }
+
+        if(Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            if (placeholderTex)
+            {
+                string highDefFileName = baseFileName;
+                if (baseFileName.EndsWith("_ld"))
+                    highDefFileName = baseFileName.Substring(0, baseFileName.Length - 3) + "_hd";
+                string highDefFilePath = Path.Combine(folderPath, highDefFileName + ".bytes");
+                byte[] hdBytes = File.ReadAllBytes(highDefFilePath);
+
+                --m_loadMipmapLevel;
+                placeholderTex.ForceSetMipLevel2(m_loadMipmapLevel, hdBytes);
+            }
+        }
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            if (placeholderTex)
+            {
+                string highDefFileName = baseFileName;
+                if (baseFileName.EndsWith("_ld"))
+                    highDefFileName = baseFileName.Substring(0, baseFileName.Length - 3) + "_hd";
+                string highDefFilePath = Path.Combine(folderPath, highDefFileName + ".bytes");
+                byte[] hdBytes = File.ReadAllBytes(highDefFilePath);
+
+                ++m_loadMipmapLevel;
+                placeholderTex.ForceSetMipLevel2(m_loadMipmapLevel, hdBytes);
+            }
+        }
+
+
+
+
+
+
+
+        //测试只加载hd包的效果 append情况才需要测试，现在hd是整包
         if (Input.GetKeyDown(KeyCode.T))
         {
             string highDefFileName = baseFileName;
@@ -74,59 +129,60 @@ public class AssetBundleLoader : MonoBehaviour
 
 
 
-        //Step1 贴图和prefab分开打AB包，纹理是一个单独的AB包
-        if (Input.GetKeyDown(KeyCode.H))
-        {
-            AssetBundle texBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "alienTex"));
-            AssetBundle prefabBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "teaport"));
+        //Old Code with AssetBundle
+        ////Step1 贴图和prefab分开打AB包，纹理是一个单独的AB包
+        //if (Input.GetKeyDown(KeyCode.H))
+        //{
+        //    AssetBundle texBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "alienTex"));
+        //    AssetBundle prefabBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "teaport"));
             
-            Object[] objects = prefabBundle.LoadAllAssets();
-            teaportGo = Instantiate(objects[0] as GameObject);
+        //    Object[] objects = prefabBundle.LoadAllAssets();
+        //    teaportGo = Instantiate(objects[0] as GameObject);
 
-            prefabBundle.Unload(false);
-            texBundle.Unload(false);
-        }
-        if (Input.GetKeyDown(KeyCode.L))
-        {
-            AssetBundle texBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "alienTex"));
-            AssetBundle prefabBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "teaport"));
+        //    prefabBundle.Unload(false);
+        //    texBundle.Unload(false);
+        //}
+        //if (Input.GetKeyDown(KeyCode.L))
+        //{
+        //    AssetBundle texBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "alienTex"));
+        //    AssetBundle prefabBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "teaport"));
 
-            Object[] objects = prefabBundle.LoadAllAssets(new AssetLoadParameters(false, 6));
-            teaportGo = Instantiate(objects[0] as GameObject);
+        //    Object[] objects = prefabBundle.LoadAllAssets(new AssetLoadParameters(false, 6));
+        //    teaportGo = Instantiate(objects[0] as GameObject);
 
-            prefabBundle.Unload(false);
-            texBundle.Unload(false);
-        }
+        //    prefabBundle.Unload(false);
+        //    texBundle.Unload(false);
+        //}
 
-        if (Input.GetKeyDown(KeyCode.UpArrow))
-        {
-            if (teaportGo != null)
-            {
-                --m_loadMipmapLevel;
-                string path = Path.Combine(Application.streamingAssetsPath, "alienTex");
-                StartCoroutine(ForceSetMipLevel(m_loadMipmapLevel, path));
-            }
-        }
+        //if (Input.GetKeyDown(KeyCode.UpArrow))
+        //{
+        //    if (teaportGo != null)
+        //    {
+        //        --m_loadMipmapLevel;
+        //        string path = Path.Combine(Application.streamingAssetsPath, "alienTex");
+        //        StartCoroutine(ForceSetMipLevel(m_loadMipmapLevel, path));
+        //    }
+        //}
 
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            if (teaportGo != null)
-            {
-                ++m_loadMipmapLevel;
-                string path = Path.Combine(Application.streamingAssetsPath, "alienTex");
-                StartCoroutine(ForceSetMipLevel(m_loadMipmapLevel, path));
-            }
-        }
+        //if (Input.GetKeyDown(KeyCode.DownArrow))
+        //{
+        //    if (teaportGo != null)
+        //    {
+        //        ++m_loadMipmapLevel;
+        //        string path = Path.Combine(Application.streamingAssetsPath, "alienTex");
+        //        StartCoroutine(ForceSetMipLevel(m_loadMipmapLevel, path));
+        //    }
+        //}
 
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            if (teaportGo)
-            {                
-                DestroyImmediate(teaportGo);
-                teaportGo = null;
-            }
-            Resources.UnloadUnusedAssets();
-        }
+        //if (Input.GetKeyDown(KeyCode.Escape))
+        //{
+        //    if (teaportGo)
+        //    {                
+        //        DestroyImmediate(teaportGo);
+        //        teaportGo = null;
+        //    }
+        //    Resources.UnloadUnusedAssets();
+        //}
     }
 
     IEnumerator ForceSetMipLevel(int mipmapLevel,string abPath)
