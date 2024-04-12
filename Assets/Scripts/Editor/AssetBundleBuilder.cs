@@ -27,7 +27,7 @@ public class AssetBundleBuilder
     [MenuItem("Assets/Build Texture Binary", false, 0)]
     static void BuildBinary()
     {
-        string folderPath = Path.Combine(Application.streamingAssetsPath, "TextureBytes");
+        string folderPath = Path.Combine(Application.streamingAssetsPath, "TextureBytes100");
         if (!Directory.Exists(folderPath))
         {
             Directory.CreateDirectory(folderPath);
@@ -40,15 +40,21 @@ public class AssetBundleBuilder
                 file.Delete();
             }
         }
-        if (!(Selection.activeObject is Texture2D))
-        {
-            Debug.LogError("Selected object is not a Texture2D.");
-            return;
-        }
 
-        Texture2D tex2D = Selection.activeObject as Texture2D;
-        SerializationToBytes(tex2D, folderPath);
-        Debug.Log("Build binary: " + tex2D.name + " finished.");
+        foreach (var selectedObj in Selection.objects)
+        {
+            if (selectedObj is Texture2D)
+            {
+                Texture2D tex2D = selectedObj as Texture2D;
+                SerializationToBytes(tex2D, folderPath);
+                Debug.Log("Build binary: " + tex2D.name + " finished.");
+            }
+            else
+            {
+                Debug.LogError("Selected object " + selectedObj.name + " is not a Texture2D.");
+                continue;
+            }
+        }
 
         // Clean up
         EditorUtility.UnloadUnusedAssetsImmediate();
