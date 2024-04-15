@@ -27,7 +27,12 @@ public class AssetBundleBuilder
     [MenuItem("Assets/Build Texture Binary", false, 0)]
     static void BuildBinary()
     {
-        string folderPath = Path.Combine(Application.streamingAssetsPath, "TextureBytes100");
+        string folderPath = Path.Combine(Application.streamingAssetsPath, "TextureBytes");
+        BuildBinary(folderPath);
+    }
+
+    private static void BuildBinary(string folderPath)
+    {
         if (!Directory.Exists(folderPath))
         {
             Directory.CreateDirectory(folderPath);
@@ -71,5 +76,45 @@ public class AssetBundleBuilder
 
         File.WriteAllBytes(lowResFilePath, lowResBytes);
         File.WriteAllBytes(highResFilePath, highResBytes);
+    }
+
+    [MenuItem("Assets/Build Texture Binary 100", false, 1)]
+    static void BuildBinary100()
+    {
+        string folderPath = Path.Combine(Application.streamingAssetsPath, "TextureBytes100");
+        BuildBinary(folderPath);
+    }
+
+    [MenuItem("Assets/ChangeTextureFormat", false, 2)]
+    static void ChangeTextureFormat()
+    {
+        var selected = Selection.activeObject;
+        if (selected == null || !(selected is Texture2D))
+        {
+            Debug.LogError("No texture selected.");
+            return;
+        }
+        string assetPath = AssetDatabase.GetAssetPath(selected);
+        var importer = AssetImporter.GetAtPath(assetPath) as TextureImporter;
+
+        if (importer != null)
+        {
+            importer.textureCompression = TextureImporterCompression.Compressed;
+            importer.SetPlatformTextureSettings(new TextureImporterPlatformSettings
+            {
+                name = "Standalone",
+                format = TextureImporterFormat.DXT1,
+                overridden = true
+            });
+
+            EditorUtility.SetDirty(importer);
+            importer.SaveAndReimport();
+
+            Debug.Log("Texture format changed to DXT1.");
+        }
+        else
+        {
+            Debug.LogError("Texture importer could not be found.");
+        }
     }
 }
