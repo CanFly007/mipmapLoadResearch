@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -113,18 +114,108 @@ public class AssetBundleLoader : MonoBehaviour
 
 
 
-        //测试只加载hd包的效果 append情况才需要测试，现在hd是整包
+        //调试AB
         if (Input.GetKeyDown(KeyCode.T))
         {
-            string highDefFileName = baseFileName;
-            if (baseFileName.EndsWith("_ld"))
-                highDefFileName = baseFileName.Substring(0, baseFileName.Length - 3) + "_hd";
-            string highDefFilePath = Path.Combine(folderPath, highDefFileName + ".bytes");
+            AssetBundle texBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "alienTex"));
+            AssetBundle prefabBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "teaport"));
 
-            byte[] hdBytes = File.ReadAllBytes(highDefFilePath);
-            placeholderTex = new Texture2D(8, 8);
-            placeholderTex.SetStreamedBinaryData(hdBytes, true); //直接Load HD
-            insteadABMat.mainTexture = placeholderTex;
+            Object[] objects = prefabBundle.LoadAllAssets();
+            teaportGo = Instantiate(objects[0] as GameObject);
+
+            prefabBundle.Unload(false);
+            texBundle.Unload(false);
+        }
+
+
+        if (Input.GetKeyDown(KeyCode.Alpha0))
+        {
+            //NativeArray<byte> myArray = new NativeArray<byte>(10, Allocator.Temp);
+            ////UnityEditor.AssetImporters.TextureGenerator.GenerateTexture()
+            //ImageConversion.EncodeNativeArrayToPNG<Color>()
+            string path0 = Path.Combine(Application.streamingAssetsPath, "TextureBytes100");
+            string path1 = Path.Combine(path0, "0_hd.bytes");
+            var nativeArray = AssetBundle.LoadFromFileNativeArray(path1);
+            if (placeholderTex == null)
+            {
+                placeholderTex = new Texture2D(8, 8);
+                insteadABMat.mainTexture = placeholderTex;
+            }
+            placeholderTex.ForceSetMipLevel3(3, nativeArray);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha9))
+        {
+            string path0 = Path.Combine(Application.streamingAssetsPath, "TextureBytes100");
+            string path1 = Path.Combine(path0, "0_hd.bytes");
+            byte[] hdBytes = File.ReadAllBytes(path1);
+            if (placeholderTex == null)
+            {
+                placeholderTex = new Texture2D(8, 8);
+                insteadABMat.mainTexture = placeholderTex;
+            }
+            placeholderTex.ForceSetMipLevel2(4, hdBytes);
+        }
+
+
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            string path0 = Path.Combine(Application.streamingAssetsPath, "TextureBytes100");
+            string path1 = Path.Combine(path0, "0_hd.bytes");
+            var nativeArray = AssetBundle.LoadFromFileNativeArray(path1);
+            if (placeholderTex == null)
+            {
+                placeholderTex = new Texture2D(8, 8);
+                insteadABMat.mainTexture = placeholderTex;
+            }
+            --m_loadMipmapLevel;
+            placeholderTex.ForceSetMipLevel3(m_loadMipmapLevel, nativeArray);
+        }
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            string path0 = Path.Combine(Application.streamingAssetsPath, "TextureBytes100");
+            string path1 = Path.Combine(path0, "0_hd.bytes");
+            var nativeArray = AssetBundle.LoadFromFileNativeArray(path1);
+            if (placeholderTex == null)
+            {
+                placeholderTex = new Texture2D(8, 8);
+                insteadABMat.mainTexture = placeholderTex;
+            }
+            ++m_loadMipmapLevel;
+            placeholderTex.ForceSetMipLevel3(m_loadMipmapLevel, nativeArray);
+        }
+
+
+
+
+
+
+        if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            // 创建图像的宽度和高度
+            uint width = 256;
+            uint height = 256;
+
+            // 创建NativeArray，并填充纯色数据
+            NativeArray<Color32> imageData = new NativeArray<Color32>((int)(width * height), Allocator.TempJob);
+            Color32 fillColor = new Color32(255, 0, 0, 255); // 红色
+
+            for (int i = 0; i < imageData.Length; i++)
+            {
+                imageData[i] = fillColor;
+            }
+
+            // 指定图像格式
+            UnityEngine.Experimental.Rendering.GraphicsFormat format = UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm;
+
+            // 调用EncodeNativeArrayToPNG来编码图像数据为PNG
+            NativeArray<byte> pngData = ImageConversion.EncodeNativeArrayToPNG(imageData, format, width, height);
+
+            // 保存PNG数据到文件
+            //SavePNG(pngData, "output.png");
+
+            // 释放分配的内存资源
+            imageData.Dispose();
+            pngData.Dispose();
         }
 
 
@@ -135,54 +226,54 @@ public class AssetBundleLoader : MonoBehaviour
         //{
         //    AssetBundle texBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "alienTex"));
         //    AssetBundle prefabBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "teaport"));
-            
-        //    Object[] objects = prefabBundle.LoadAllAssets();
-        //    teaportGo = Instantiate(objects[0] as GameObject);
 
-        //    prefabBundle.Unload(false);
-        //    texBundle.Unload(false);
-        //}
-        //if (Input.GetKeyDown(KeyCode.L))
-        //{
-        //    AssetBundle texBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "alienTex"));
-        //    AssetBundle prefabBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "teaport"));
+            //    Object[] objects = prefabBundle.LoadAllAssets();
+            //    teaportGo = Instantiate(objects[0] as GameObject);
 
-        //    Object[] objects = prefabBundle.LoadAllAssets(new AssetLoadParameters(false, 6));
-        //    teaportGo = Instantiate(objects[0] as GameObject);
+            //    prefabBundle.Unload(false);
+            //    texBundle.Unload(false);
+            //}
+            //if (Input.GetKeyDown(KeyCode.L))
+            //{
+            //    AssetBundle texBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "alienTex"));
+            //    AssetBundle prefabBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "teaport"));
 
-        //    prefabBundle.Unload(false);
-        //    texBundle.Unload(false);
-        //}
+            //    Object[] objects = prefabBundle.LoadAllAssets(new AssetLoadParameters(false, 6));
+            //    teaportGo = Instantiate(objects[0] as GameObject);
 
-        //if (Input.GetKeyDown(KeyCode.UpArrow))
-        //{
-        //    if (teaportGo != null)
-        //    {
-        //        --m_loadMipmapLevel;
-        //        string path = Path.Combine(Application.streamingAssetsPath, "alienTex");
-        //        StartCoroutine(ForceSetMipLevel(m_loadMipmapLevel, path));
-        //    }
-        //}
+            //    prefabBundle.Unload(false);
+            //    texBundle.Unload(false);
+            //}
 
-        //if (Input.GetKeyDown(KeyCode.DownArrow))
-        //{
-        //    if (teaportGo != null)
-        //    {
-        //        ++m_loadMipmapLevel;
-        //        string path = Path.Combine(Application.streamingAssetsPath, "alienTex");
-        //        StartCoroutine(ForceSetMipLevel(m_loadMipmapLevel, path));
-        //    }
-        //}
+            //if (Input.GetKeyDown(KeyCode.UpArrow))
+            //{
+            //    if (teaportGo != null)
+            //    {
+            //        --m_loadMipmapLevel;
+            //        string path = Path.Combine(Application.streamingAssetsPath, "alienTex");
+            //        StartCoroutine(ForceSetMipLevel(m_loadMipmapLevel, path));
+            //    }
+            //}
 
-        //if (Input.GetKeyDown(KeyCode.Escape))
-        //{
-        //    if (teaportGo)
-        //    {                
-        //        DestroyImmediate(teaportGo);
-        //        teaportGo = null;
-        //    }
-        //    Resources.UnloadUnusedAssets();
-        //}
+            //if (Input.GetKeyDown(KeyCode.DownArrow))
+            //{
+            //    if (teaportGo != null)
+            //    {
+            //        ++m_loadMipmapLevel;
+            //        string path = Path.Combine(Application.streamingAssetsPath, "alienTex");
+            //        StartCoroutine(ForceSetMipLevel(m_loadMipmapLevel, path));
+            //    }
+            //}
+
+            //if (Input.GetKeyDown(KeyCode.Escape))
+            //{
+            //    if (teaportGo)
+            //    {                
+            //        DestroyImmediate(teaportGo);
+            //        teaportGo = null;
+            //    }
+            //    Resources.UnloadUnusedAssets();
+            //}
     }
 
     IEnumerator ForceSetMipLevel(int mipmapLevel,string abPath)

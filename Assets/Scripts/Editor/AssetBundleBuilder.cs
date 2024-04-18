@@ -50,7 +50,7 @@ public class AssetBundleBuilder
         {
             if (selectedObj is Texture2D)
             {
-                Texture2D tex2D = selectedObj as Texture2D;
+                Texture2D tex2D = selectedObj as Texture2D;  //压缩后的图，即DXT1的数据
                 SerializationToBytes(tex2D, folderPath);
                 Debug.Log("Build binary: " + tex2D.name + " finished.");
             }
@@ -117,4 +117,5 @@ public class AssetBundleBuilder
             Debug.LogError("Texture importer could not be found.");
         }
     }
+
 }
