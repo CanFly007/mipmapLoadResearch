@@ -128,32 +128,50 @@ public class AssetBundleLoader : MonoBehaviour
         }
 
 
-        if (Input.GetKeyDown(KeyCode.Alpha0))
+
+
+        if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            //NativeArray<byte> myArray = new NativeArray<byte>(10, Allocator.Temp);
-            ////UnityEditor.AssetImporters.TextureGenerator.GenerateTexture()
-            //ImageConversion.EncodeNativeArrayToPNG<Color>()
             string path0 = Path.Combine(Application.streamingAssetsPath, "TextureBytes100");
-            string path1 = Path.Combine(path0, "0_hd.bytes");
-            var nativeArray = AssetBundle.LoadFromFileNativeArray(path1);
+            string path1 = Path.Combine(path0, "0_ld.bytes");
+
             if (placeholderTex == null)
             {
                 placeholderTex = new Texture2D(8, 8);
                 insteadABMat.mainTexture = placeholderTex;
             }
-            placeholderTex.ForceSetMipLevel3(3, nativeArray);
+
+            NativeArray<byte> ldBytes = Texture2D.LoadFromFileNativeArray(path1);
+            placeholderTex.SetStreamedBinaryData(ldBytes); //用这个api
         }
-        if (Input.GetKeyDown(KeyCode.Alpha9))
+        if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             string path0 = Path.Combine(Application.streamingAssetsPath, "TextureBytes100");
             string path1 = Path.Combine(path0, "0_hd.bytes");
+
+            if (placeholderTex == null)
+            {
+                placeholderTex = new Texture2D(8, 8);
+                insteadABMat.mainTexture = placeholderTex;
+            }
+
+            NativeArray<byte> hdBytes = Texture2D.LoadFromFileNativeArray(path1);
+            placeholderTex.SetStreamedBinaryData(hdBytes);
+        }
+
+
+        if (Input.GetKeyDown(KeyCode.Alpha9)) //参照组，和之前File.ReadAllBytes读出来数据相同
+        {
+            string path0 = Path.Combine(Application.streamingAssetsPath, "TextureBytes100");
+            string path1 = Path.Combine(path0, "0_ld.bytes");
             byte[] hdBytes = File.ReadAllBytes(path1);
             if (placeholderTex == null)
             {
                 placeholderTex = new Texture2D(8, 8);
                 insteadABMat.mainTexture = placeholderTex;
             }
-            placeholderTex.ForceSetMipLevel2(4, hdBytes);
+            m_loadMipmapLevel = 4;
+            placeholderTex.ForceSetMipLevel2(m_loadMipmapLevel, hdBytes);
         }
 
 
@@ -161,7 +179,7 @@ public class AssetBundleLoader : MonoBehaviour
         {
             string path0 = Path.Combine(Application.streamingAssetsPath, "TextureBytes100");
             string path1 = Path.Combine(path0, "0_hd.bytes");
-            var nativeArray = AssetBundle.LoadFromFileNativeArray(path1);
+            var nativeArray = Texture2D.LoadFromFileNativeArray(path1);
             if (placeholderTex == null)
             {
                 placeholderTex = new Texture2D(8, 8);
@@ -174,7 +192,7 @@ public class AssetBundleLoader : MonoBehaviour
         {
             string path0 = Path.Combine(Application.streamingAssetsPath, "TextureBytes100");
             string path1 = Path.Combine(path0, "0_hd.bytes");
-            var nativeArray = AssetBundle.LoadFromFileNativeArray(path1);
+            var nativeArray = Texture2D.LoadFromFileNativeArray(path1);
             if (placeholderTex == null)
             {
                 placeholderTex = new Texture2D(8, 8);
