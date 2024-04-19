@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -18,7 +19,7 @@ public class AssetBundleLoader100 : MonoBehaviour
 
 
 
-    public int needCount = 100;
+    private int needCount = 100;
     private int lastTexCount;
     public GameObject quadPrefab;
     public float separation = 1.5f;
@@ -69,10 +70,10 @@ public class AssetBundleLoader100 : MonoBehaviour
         }
     }
 
-    byte[] LoadCustomBytes(Texture2D texture, bool isHd)
+    NativeArray<byte> LoadCustomBytes(Texture2D texture, bool isHd)
     {
         string path = isHd ? Path.Combine(folderPath, texture.name + "_hd.bytes") : Path.Combine(folderPath, texture.name + "_ld.bytes");
-        byte[] bytes = File.ReadAllBytes(path);
+        NativeArray<byte> bytes = Texture2D.LoadFromFileNativeArray(path);
         return bytes;
     }
 
@@ -83,8 +84,8 @@ public class AssetBundleLoader100 : MonoBehaviour
             for (int i = 0; i < textures.Count; ++i)
             {
                 var tex2D = textures[i];
-                byte[] bytes = LoadCustomBytes(tex2D, false);
-                tex2D.SetStreamedBinaryData(bytes, true);
+                NativeArray<byte> bytes = LoadCustomBytes(tex2D, false);
+                tex2D.SetStreamedBinaryData(bytes);
             }
         }
         
@@ -93,8 +94,8 @@ public class AssetBundleLoader100 : MonoBehaviour
             for (int i = 0; i < textures.Count; ++i)
             {
                 var tex2D = textures[i];
-                byte[] bytes = LoadCustomBytes(tex2D, true);
-                tex2D.SetStreamedBinaryData(bytes, true);
+                NativeArray<byte> bytes = LoadCustomBytes(tex2D, true);
+                tex2D.SetStreamedBinaryData(bytes);
             }
         }
 
@@ -106,8 +107,8 @@ public class AssetBundleLoader100 : MonoBehaviour
                 var tex2D = textures[i];
                 if (tex2D)
                 {
-                    byte[] bytes = LoadCustomBytes(tex2D, true);
-                    tex2D.ForceSetMipLevel2(m_loadMipmapLevel, bytes);
+                    NativeArray<byte> bytes = LoadCustomBytes(tex2D, true);
+                    tex2D.ForceSetMipLevel3(m_loadMipmapLevel, bytes);
                 }
             }
         }
@@ -119,8 +120,8 @@ public class AssetBundleLoader100 : MonoBehaviour
                 var tex2D = textures[i];
                 if (tex2D)
                 {
-                    byte[] bytes = LoadCustomBytes(tex2D, true);
-                    tex2D.ForceSetMipLevel2(m_loadMipmapLevel, bytes);
+                    NativeArray<byte> bytes = LoadCustomBytes(tex2D, true);
+                    tex2D.ForceSetMipLevel3(m_loadMipmapLevel, bytes);
                 }
             }
         }
