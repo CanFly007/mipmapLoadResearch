@@ -27,6 +27,8 @@ public class AssetBundleLoader100 : MonoBehaviour
     private List<Texture2D> textures = new List<Texture2D>();
     public Transform parent;
 
+    private const int MAX_BYTES_PER_FRAME = 16 * 1024 * 1024;
+
     private void Start()
     {
         folderPath = Path.Combine(Application.streamingAssetsPath, "TextureBytes100");
@@ -77,53 +79,71 @@ public class AssetBundleLoader100 : MonoBehaviour
         return bytes;
     }
 
+    IEnumerator LoadAndUploadTextures(bool isHd, int? mipmapLevel)
+    {
+        int currentFrameBytes = 0;
+        List<(Texture2D, NativeArray<byte>)> pendingUploads = new List<(Texture2D, NativeArray<byte>)>();
+        
+        int i = 0;
+        while (i < textures.Count)
+        {
+            Texture2D tex = textures[i];
+            NativeArray<byte> bytes = LoadCustomBytes(tex, isHd);
+            if (bytes.IsCreated) //todo NativeArray构建？
+            {
+                pendingUploads.Add((tex, bytes));
+                currentFrameBytes += bytes.Length;
+            }
+            if (bytes.IsCreated == false || currentFrameBytes >= MAX_BYTES_PER_FRAME)
+            {
+                foreach (var (texture, uploadBytes) in pendingUploads)
+                {
+                    if(mipmapLevel.HasValue == false)
+                        texture.SetStreamedBinaryData(uploadBytes);
+                    else
+                        texture.ForceSetMipLevel3(mipmapLevel.Value, uploadBytes);
+                }
+                pendingUploads.Clear();
+                currentFrameBytes = 0;
+
+                yield return null;
+
+                if (bytes.IsCreated == false)
+                    continue; // 如果当前纹理加载失败，重试当前纹理
+            }
+            ++i;
+        }
+        //处理剩余数据
+        foreach (var (texture, uploadBytes) in pendingUploads)
+        {
+            if (mipmapLevel.HasValue == false)
+                texture.SetStreamedBinaryData(uploadBytes);
+            else
+                texture.ForceSetMipLevel3(mipmapLevel.Value, uploadBytes);
+        }
+    }
+
     void Update()
     {
         if(Input.GetKeyDown(KeyCode.L))
         {
-            for (int i = 0; i < textures.Count; ++i)
-            {
-                var tex2D = textures[i];
-                NativeArray<byte> bytes = LoadCustomBytes(tex2D, false);
-                tex2D.SetStreamedBinaryData(bytes);
-            }
+            StartCoroutine(LoadAndUploadTextures(false, null));
         }
         
         if (Input.GetKeyDown(KeyCode.H))
         {
-            for (int i = 0; i < textures.Count; ++i)
-            {
-                var tex2D = textures[i];
-                NativeArray<byte> bytes = LoadCustomBytes(tex2D, true);
-                tex2D.SetStreamedBinaryData(bytes);
-            }
+            StartCoroutine(LoadAndUploadTextures(true, null));
         }
 
         if(Input.GetKeyDown(KeyCode.UpArrow))
         {
             m_loadMipmapLevel = Mathf.Clamp(--m_loadMipmapLevel, 0, textures[0].mipmapCount);
-            for (int i = 0; i < textures.Count; ++i)
-            {
-                var tex2D = textures[i];
-                if (tex2D)
-                {
-                    NativeArray<byte> bytes = LoadCustomBytes(tex2D, true);
-                    tex2D.ForceSetMipLevel3(m_loadMipmapLevel, bytes);
-                }
-            }
+            StartCoroutine(LoadAndUploadTextures(true, m_loadMipmapLevel));
         }
         if (Input.GetKeyDown(KeyCode.DownArrow))
         {
             m_loadMipmapLevel = Mathf.Clamp(++m_loadMipmapLevel, 0, textures[0].mipmapCount);
-            for (int i = 0; i < textures.Count; ++i)
-            {
-                var tex2D = textures[i];
-                if (tex2D)
-                {
-                    NativeArray<byte> bytes = LoadCustomBytes(tex2D, true);
-                    tex2D.ForceSetMipLevel3(m_loadMipmapLevel, bytes);
-                }
-            }
+            StartCoroutine(LoadAndUploadTextures(true, m_loadMipmapLevel));
         }
     }
 }
