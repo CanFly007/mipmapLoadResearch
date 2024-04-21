@@ -31,7 +31,7 @@ public class AssetBundleLoader100 : MonoBehaviour
 
     private void Start()
     {
-        MAX_BYTES_PER_FRAME = QualitySettings.texture2DLoadBufferSize * 1024 * 1024;
+        MAX_BYTES_PER_FRAME = QualitySettings.texture2DReadBufferSize * 1024 * 1024;
         folderPath = Path.Combine(Application.streamingAssetsPath, "TextureBytes100");
         UpdateQuads();
     }
