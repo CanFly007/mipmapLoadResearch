@@ -1,0 +1,3 @@
+astcenc-sse2  -cl "D:/202404/TextureCompressUnityProj/Assets\Images\RGBA32.png" "D:/202404/TextureCompressUnityProj/Assets\Images\RGBA32.astc" 6x6 -medium -yflip
+
+crunch -file "D:/202404/TextureCompressUnityProj/Assets\Images\RGBA32.png" -fileformat dds -dxt1

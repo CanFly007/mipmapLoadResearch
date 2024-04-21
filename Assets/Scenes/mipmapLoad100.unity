@@ -137,6 +137,7 @@ GameObject:
   - component: {fileID: 713494652}
   - component: {fileID: 713494650}
   - component: {fileID: 713494651}
+  - component: {fileID: 713494656}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -171,7 +172,6 @@ MonoBehaviour:
   placeholderTex: {fileID: 0}
   insteadABMat: {fileID: 0}
   baseFileName: Amazing Speed_Floor_D_ld
-  needCount: 100
   quadPrefab: {fileID: 7350635946387517743, guid: 360028f5be402c841a804c0687bf1d3a, type: 3}
   separation: 1.5
   parent: {fileID: 786751504}
@@ -261,6 +261,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &713494656
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 713494649}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9273c7247d41af5449c18ea1a4a533b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &786751503
 GameObject:
   m_ObjectHideFlags: 0
