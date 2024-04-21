@@ -37,7 +37,7 @@ public class TextureCompress : MonoBehaviour
             throw new FileNotFoundException($"Cannot find dxt encoder at {Path.GetFullPath(crunchToolPath)}.");
 
         //图片
-        pngPath = Path.Combine(Application.dataPath, "Images", "RGBA32.png");
+        pngPath = Path.Combine(Application.dataPath, "Images", "SampleTexture.png");
         if (!File.Exists(pngPath))
         {
             throw new FileNotFoundException($"Cannot find image at {Path.GetFullPath(pngPath)}.");

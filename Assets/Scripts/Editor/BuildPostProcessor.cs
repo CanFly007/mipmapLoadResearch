@@ -73,7 +73,7 @@ public class BuildPostProcessor : IPostprocessBuildWithReport
 
 
         // 复制图片
-        string imageName = "RGBA32.png";
+        string imageName = "SampleTexture.png";
         string sourcePathImage = Path.Combine(Application.dataPath, "Images", imageName);
         string destinationImagesDir = Path.Combine(outputDir, Application.productName + "_Data", "Images");
         string targetPathImage = Path.Combine(destinationImagesDir, imageName);
