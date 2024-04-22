@@ -76,7 +76,7 @@ public class AssetBundleLoader100 : MonoBehaviour
     NativeArray<byte> LoadCustomBytes(Texture2D texture, bool isHd)
     {
         string path = isHd ? Path.Combine(folderPath, texture.name + "_hd.bytes") : Path.Combine(folderPath, texture.name + "_ld.bytes");
-        NativeArray<byte> bytes = Texture2D.LoadFromFileNativeArray(path);
+        NativeArray<byte> bytes = Texture2D.ReadTextureDataFromFile(path);
         return bytes;
     }
 

@@ -141,7 +141,7 @@ public class AssetBundleLoader : MonoBehaviour
                 insteadABMat.mainTexture = placeholderTex;
             }
 
-            NativeArray<byte> ldBytes = Texture2D.LoadFromFileNativeArray(path1);
+            NativeArray<byte> ldBytes = Texture2D.ReadTextureDataFromFile(path1);
             placeholderTex.SetStreamedBinaryData(ldBytes); //用这个api
         }
         if (Input.GetKeyDown(KeyCode.Alpha2))
@@ -155,7 +155,7 @@ public class AssetBundleLoader : MonoBehaviour
                 insteadABMat.mainTexture = placeholderTex;
             }
 
-            NativeArray<byte> hdBytes = Texture2D.LoadFromFileNativeArray(path1);
+            NativeArray<byte> hdBytes = Texture2D.ReadTextureDataFromFile(path1);
             placeholderTex.SetStreamedBinaryData(hdBytes);
         }
 
@@ -179,7 +179,7 @@ public class AssetBundleLoader : MonoBehaviour
         {
             string path0 = Path.Combine(Application.streamingAssetsPath, "TextureBytes100");
             string path1 = Path.Combine(path0, "0_hd.bytes");
-            var nativeArray = Texture2D.LoadFromFileNativeArray(path1);
+            var nativeArray = Texture2D.ReadTextureDataFromFile(path1);
             if (placeholderTex == null)
             {
                 placeholderTex = new Texture2D(8, 8);
@@ -192,7 +192,7 @@ public class AssetBundleLoader : MonoBehaviour
         {
             string path0 = Path.Combine(Application.streamingAssetsPath, "TextureBytes100");
             string path1 = Path.Combine(path0, "0_hd.bytes");
-            var nativeArray = Texture2D.LoadFromFileNativeArray(path1);
+            var nativeArray = Texture2D.ReadTextureDataFromFile(path1);
             if (placeholderTex == null)
             {
                 placeholderTex = new Texture2D(8, 8);
