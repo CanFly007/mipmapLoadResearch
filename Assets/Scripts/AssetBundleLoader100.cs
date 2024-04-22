@@ -90,7 +90,7 @@ public class AssetBundleLoader100 : MonoBehaviour
         {
             Texture2D tex = textures[i];
             NativeArray<byte> bytes = LoadCustomBytes(tex, isHd);
-            if (bytes.IsCreated) //todo NativeArray构建？
+            if (bytes.IsCreated) //m_Buffer != null
             {
                 pendingUploads.Add((tex, bytes));
                 currentFrameBytes += bytes.Length;
