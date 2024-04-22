@@ -41,8 +41,8 @@ QualitySettings:
     asyncUploadPersistentBuffer: 1
     shadowUsingLowestLOD: 0
     yahahaShadowCasterOpt: 0
-    texture2DLoadBufferSize: 8
-    texture2DLoadPersistentBuffer: 1
+    texture2DReadBufferSize: 8
+    texture2DReadPersistentBuffer: 1
     resolutionScalingFixedDPIFactor: 1
     customRenderPipeline: {fileID: 0}
     excludedTargetPlatforms: []
@@ -81,8 +81,8 @@ QualitySettings:
     asyncUploadPersistentBuffer: 1
     shadowUsingLowestLOD: 0
     yahahaShadowCasterOpt: 0
-    texture2DLoadBufferSize: 16
-    texture2DLoadPersistentBuffer: 1
+    texture2DReadBufferSize: 16
+    texture2DReadPersistentBuffer: 1
     resolutionScalingFixedDPIFactor: 1
     customRenderPipeline: {fileID: 0}
     excludedTargetPlatforms: []
@@ -121,8 +121,8 @@ QualitySettings:
     asyncUploadPersistentBuffer: 1
     shadowUsingLowestLOD: 0
     yahahaShadowCasterOpt: 0
-    texture2DLoadBufferSize: 16
-    texture2DLoadPersistentBuffer: 1
+    texture2DReadBufferSize: 16
+    texture2DReadPersistentBuffer: 1
     resolutionScalingFixedDPIFactor: 1
     customRenderPipeline: {fileID: 0}
     excludedTargetPlatforms: []
@@ -161,8 +161,8 @@ QualitySettings:
     asyncUploadPersistentBuffer: 1
     shadowUsingLowestLOD: 0
     yahahaShadowCasterOpt: 0
-    texture2DLoadBufferSize: 16
-    texture2DLoadPersistentBuffer: 1
+    texture2DReadBufferSize: 16
+    texture2DReadPersistentBuffer: 1
     resolutionScalingFixedDPIFactor: 1
     customRenderPipeline: {fileID: 0}
     excludedTargetPlatforms: []
@@ -201,8 +201,8 @@ QualitySettings:
     asyncUploadPersistentBuffer: 1
     shadowUsingLowestLOD: 0
     yahahaShadowCasterOpt: 0
-    texture2DLoadBufferSize: 16
-    texture2DLoadPersistentBuffer: 1
+    texture2DReadBufferSize: 16
+    texture2DReadPersistentBuffer: 1
     resolutionScalingFixedDPIFactor: 1
     customRenderPipeline: {fileID: 0}
     excludedTargetPlatforms: []
@@ -241,8 +241,8 @@ QualitySettings:
     asyncUploadPersistentBuffer: 1
     shadowUsingLowestLOD: 0
     yahahaShadowCasterOpt: 0
-    texture2DLoadBufferSize: 16
-    texture2DLoadPersistentBuffer: 1
+    texture2DReadBufferSize: 16
+    texture2DReadPersistentBuffer: 1
     resolutionScalingFixedDPIFactor: 1
     customRenderPipeline: {fileID: 0}
     excludedTargetPlatforms: []
