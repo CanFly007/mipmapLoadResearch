@@ -1,3 +1,6 @@
 astcenc-sse2  -cl "D:/202404/TextureCompressUnityProj/Assets\Images\SampleTexture.png" "D:/202404/TextureCompressUnityProj/Assets\Images\SampleTexture.astc" 6x6 -medium -yflip
 
 crunch -file "D:/202404/TextureCompressUnityProj/Assets\Images\SampleTexture.png" -fileformat dds -dxt1
+
+
+chmod +x ./astcenc-sse2-arm64   执行这个操作增加权限在mac上
