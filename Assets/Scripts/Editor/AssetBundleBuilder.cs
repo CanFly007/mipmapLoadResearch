@@ -22,6 +22,25 @@ public class AssetBundleBuilder
         AssetDatabase.Refresh();
     }
 
+    [MenuItem("Assets/Test Compress in unity", false, 3)]
+    static void TestCompressUnity()
+    {
+        foreach (var selectedObj in Selection.objects)
+        {
+            if (selectedObj is Texture2D)
+            {
+                Texture2D tex2D = selectedObj as Texture2D;  //压缩后的图，即DXT1的数据
+                tex2D.Compress(false);
+                Debug.Log("Build binary: " + tex2D.name + " finished.");
+            }
+            else
+            {
+                Debug.LogError("Selected object " + selectedObj.name + " is not a Texture2D.");
+                continue;
+            }
+        }
+    }
+
     public static int splitMipLevel = 6;
 
     [MenuItem("Assets/Build Texture Binary", false, 0)]
