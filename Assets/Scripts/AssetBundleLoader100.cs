@@ -73,10 +73,15 @@ public class AssetBundleLoader100 : MonoBehaviour
         }
     }
 
-    NativeArray<byte> LoadCustomBytes(Texture2D texture, bool isHd)
+    NativeArray<byte> LoadCustomBytes(Texture2D texture, bool isHd, int? mipmapLevel)
     {
         string path = isHd ? Path.Combine(folderPath, texture.name + "_hd.bytes") : Path.Combine(folderPath, texture.name + "_ld.bytes");
-        NativeArray<byte> bytes = Texture2D.ReadTextureDataFromFile(path);
+
+        NativeArray<byte> bytes;
+        if (mipmapLevel.HasValue == false)
+            bytes = Texture2D.ReadTextureDataFromFile(path);
+        else
+            bytes = Texture2D.ReadTextureDataFromFile2(path, mipmapLevel.Value, texture);
         return bytes;
     }
 
@@ -89,7 +94,13 @@ public class AssetBundleLoader100 : MonoBehaviour
         while (i < textures.Count)
         {
             Texture2D tex = textures[i];
-            NativeArray<byte> bytes = LoadCustomBytes(tex, isHd);
+
+            NativeArray<byte> bytes;
+            if (mipmapLevel.HasValue == false)
+                bytes = LoadCustomBytes(tex, isHd, null);
+            else
+               bytes = LoadCustomBytes(tex, isHd, mipmapLevel.Value);
+
             if (bytes.IsCreated) //m_Buffer != null
             {
                 pendingUploads.Add((tex, bytes));
@@ -102,7 +113,7 @@ public class AssetBundleLoader100 : MonoBehaviour
                     if(mipmapLevel.HasValue == false)
                         texture.SetStreamedBinaryData(uploadBytes);
                     else
-                        texture.ForceSetMipLevel3(mipmapLevel.Value, uploadBytes);
+                        texture.ForceSetMipLevel4(mipmapLevel.Value, uploadBytes);
                 }
                 pendingUploads.Clear();
                 currentFrameBytes = 0;
@@ -120,7 +131,7 @@ public class AssetBundleLoader100 : MonoBehaviour
             if (mipmapLevel.HasValue == false)
                 texture.SetStreamedBinaryData(uploadBytes);
             else
-                texture.ForceSetMipLevel3(mipmapLevel.Value, uploadBytes);
+                texture.ForceSetMipLevel4(mipmapLevel.Value, uploadBytes);
         }
     }
 
