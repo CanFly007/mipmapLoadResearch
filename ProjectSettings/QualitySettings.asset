@@ -41,7 +41,7 @@ QualitySettings:
     asyncUploadPersistentBuffer: 1
     shadowUsingLowestLOD: 0
     yahahaShadowCasterOpt: 0
-    texture2DReadBufferSize: 8
+    texture2DReadBufferSize: 2
     texture2DReadPersistentBuffer: 1
     resolutionScalingFixedDPIFactor: 1
     customRenderPipeline: {fileID: 0}
