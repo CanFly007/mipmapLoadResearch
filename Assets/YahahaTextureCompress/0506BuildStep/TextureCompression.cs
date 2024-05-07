@@ -15,6 +15,18 @@ public static class TextureCompression
     // 可以添加其他方法的声明
 }
 
+public static class StbImageLoader
+{
+    [DllImport("stb_lib", EntryPoint = "MyImageLoadFunction")]
+    public static extern int MyImageLoadFunction(string filename);
+
+    [DllImport("stb_lib", EntryPoint = "MyStbirResizeUint8")]
+    public static extern int MyStbirResizeUint8(
+    byte[] input_pixels, int input_w, int input_h, int input_stride_in_bytes,
+    byte[] output_pixels, int output_w, int output_h, int output_stride_in_bytes,
+    int num_channels);
+}
+
 public struct BC7EncodingSettings
 {
     // 根据实际需要定义字段
