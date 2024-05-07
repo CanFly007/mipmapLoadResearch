@@ -37,8 +37,10 @@ public class TextureProcessor : MonoBehaviour
             Marshal.Copy(rgba32Data, 0, unmanagedInput, rgba32Data.Length);
 
             // 输出缓冲区也需要分配，BC1每个块压缩到1byte，每块涵盖4x4像素
-            int blockSize = 16; // BC1压缩到8字节每4x4块
-            int blockCount = (width + 3 / 4) * (height + 3 / 4);
+            int blockSize = 16; // BC3压缩到16字节每4x4块
+            int num_blocks_wide = (width + 3) / 4;
+            int num_blocks_high = (height + 3) / 4;
+            int blockCount = num_blocks_wide * num_blocks_high;
             IntPtr unmanagedOutput = Marshal.AllocHGlobal(blockCount * blockSize);
 
             // 创建rgba_surface实例并填充数据
