@@ -33,7 +33,8 @@ public class TextureProcessor : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.B))
         {
-            BuildTextureBytes();
+            //BuildTextureBytes();
+            CompressASTC();
         }
 
         if (Input.GetKeyDown(KeyCode.L))
@@ -314,4 +315,51 @@ public class TextureProcessor : MonoBehaviour
         return result;
     }
 
+    public int CompressASTC()
+    {
+        uint thread_count = 20;
+        const astcenc_profile profile = astcenc_profile.ASTCENC_PRF_LDR;
+        const float quality = 60.0f;
+        uint block_x = 4;
+        uint block_y = 4;
+        uint block_z = 1;
+
+
+        astcenc_config config;
+        config.block_x = block_x;
+        config.block_y = block_y;
+        config.block_z = block_z;
+        config.profile = profile;
+
+        astcenc_error status;
+        status = Astcenc.astcenc_config_init(profile, block_x, block_y, 1, quality, 0, out config);
+
+        IntPtr context;
+        status = Astcenc.astcenc_context_alloc(ref config, thread_count, out context);
+
+
+
+        //// Load image using a method suitable for Unity, e.g., from Resources or direct file access
+        //Texture2D texture = LoadTexture(args[1]);
+        //byte[] rawImageData = texture.GetRawTextureData();
+        //GCHandle pinnedArray = GCHandle.Alloc(rawImageData, GCHandleType.Pinned);
+        //IntPtr pointer = pinnedArray.AddrOfPinnedObject();
+
+        //AstcencSwizzle swizzle = new AstcencSwizzle { ... }; // Set as needed
+        //byte[] compressedData = new byte[calculatedBufferSize]; // Calculate buffer size as needed
+
+        //status = AstcencNative.astcenc_compress_image(context, pointer, ref swizzle, compressedData, (uint)compressedData.Length, 0);
+        //if (status != AstcencError.Success)
+        //{
+        //    Debug.LogError("Compression failed");
+        //    return 1;
+        //}
+
+        //// Additional steps to save or use the compressed data...
+
+        //pinnedArray.Free();
+        //AstcencNative.astcenc_context_free(context);
+
+        return 0;
+    }
 }
