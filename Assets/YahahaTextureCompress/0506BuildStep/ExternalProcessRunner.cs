@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using Unity.Collections;
 using UnityEngine;
@@ -14,57 +15,58 @@ public class ExternalProcessRunner : MonoBehaviour
 
     public Material quadMat;
 
-    void Start()
-    {
-        // 调用外部程序
-        //RunExternalExecutable();
-    }
-
     private void Update()
     {
-        //从头到尾来一遍
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            //从input.png 到 bc7.dds
-            RunExternalExecutable();
+            //step1: input.png -> x.dds
+            string inputFilePath = "Assets/YahahaTextureCompress/0506BuildStep/input.png";
+            string outputFilePath = "Assets/YahahaTextureCompress/0506BuildStep/bc3.dds";
+            LaunchTextureCompression(inputFilePath, outputFilePath, CompressionType.BC3, new List<string>() { "-mipmap" });
 
-            //从dds到unity的Texture2D对象
-            var bytes = File.ReadAllBytes(outputFilePath);
-            Texture2D texture = LoadTextureDXT(bytes, TextureFormat.BC7);
+            //step2: x.dds -> texture2D in memory
+            var ddsBytes = File.ReadAllBytes(outputFilePath);
+            Texture2D tex2D = DDSByteToTexture2D(ddsBytes);
 
-            //从Texture2D对象 到 二进制文件
-            BuildToLDAndHDBundle(texture);
-
-            //测试：从二进制文件加载出来，显示这张图
-            string path = Path.Combine(Application.streamingAssetsPath, "BuildTextureBytes", "_hd.bytes");
-            if (placeholderTex == null)
-            {
-                placeholderTex = new Texture2D(8, 8);
-                quadMat.mainTexture = placeholderTex;
-            }
-
-            NativeArray<byte> hdBytes = Texture2D.ReadTextureDataFromFile(path);
-            placeholderTex.SetStreamedBinaryData(hdBytes);
+            //step3: texture2D in memory -> _ld.bytes and _hd.bytes
+            BuildToLDAndHDBundle(tex2D);
         }
 
-
-        if (Input.GetKeyDown(KeyCode.Alpha9))
-        {
-            //从dds到unity的Texture2D对象
-            var bytes = File.ReadAllBytes(outputFilePath);
-            Texture2D texture = LoadTextureDXT(bytes, TextureFormat.BC7);
-            //quadMat.mainTexture = texture;
-
-            //从Texture2D对象 到 二进制文件
-            BuildToLDAndHDBundle(texture);
-        }
-
-
-
-        ShowBinaryToUnityTexture2D();
+        //测试：从二进制文件加载出来，显示这张图
+        ShowBinaryToUnityTexture2D("_ld.bytes", "_hd.bytes");
     }
 
-    void RunExternalExecutable()
+    public enum CompressionType
+    {
+        BC1,
+        BC3,
+        BC7,
+        ASTC_4x4,
+        ASTC_5x5,
+        ASTC_6x6
+    }
+    private static string GetCompressionArguments(CompressionType compressionType, string inputPath, string outputPath, List<string> additionalArgs)
+    {
+        string args = compressionType switch
+        {
+            CompressionType.BC1 => $"bc 1 \"{inputPath}\" \"{outputPath}\"",
+            CompressionType.BC3 => $"bc 3 \"{inputPath}\" \"{outputPath}\"",
+            CompressionType.BC7 => $"bc 7 \"{inputPath}\" \"{outputPath}\"",
+            CompressionType.ASTC_4x4 => $"astc 4x4 \"{inputPath}\" \"{outputPath}\"",
+            CompressionType.ASTC_5x5 => $"astc 5x5 \"{inputPath}\" \"{outputPath}\"",
+            CompressionType.ASTC_6x6 => $"astc 6x6 \"{inputPath}\" \"{outputPath}\"",
+            _ => throw new System.ArgumentOutOfRangeException(nameof(compressionType), "Unsupported compression type.")
+        };
+
+        if (additionalArgs != null && additionalArgs.Count > 0)
+        {
+            args += " " + string.Join(" ", additionalArgs);
+        }
+
+        return args;
+    }
+
+    void LaunchTextureCompression(string inputFilePath, string outputFilePath, CompressionType compressionType, List<string> additionalArgs = null)
     {
         // 获取绝对路径
         string absoluteInputPath = System.IO.Path.GetFullPath(inputFilePath);
@@ -72,9 +74,8 @@ public class ExternalProcessRunner : MonoBehaviour
 
         // 设置进程信息
         ProcessStartInfo startInfo = new ProcessStartInfo();
-        startInfo.FileName = executableName;  // 或者使用完整路径
-        startInfo.Arguments = $"bc 7 \"{absoluteInputPath}\" \"{absoluteOutputPath}\"";
-        //startInfo.Arguments = $"astc 6x6 \"{absoluteInputPath}\" \"{absoluteOutputPath}\"";
+        startInfo.FileName = executableName;
+        startInfo.Arguments = GetCompressionArguments(compressionType, absoluteInputPath, absoluteOutputPath, additionalArgs);
         startInfo.UseShellExecute = false;
         startInfo.RedirectStandardOutput = true;
         startInfo.RedirectStandardError = true;
@@ -83,15 +84,12 @@ public class ExternalProcessRunner : MonoBehaviour
         {
             using (Process process = Process.Start(startInfo))
             {
-                // 等待进程结束
                 process.WaitForExit();
 
-                // 检查进程返回值
-                if (process.ExitCode == 0)
+                if (process.ExitCode == 0) // 检查进程返回值
                 {
                     Debug.Log("Process completed successfully.");
                     Debug.Log("Generated file: " + absoluteOutputPath);
-
                 }
                 else
                 {
@@ -105,58 +103,134 @@ public class ExternalProcessRunner : MonoBehaviour
         }
     }
 
-    Texture2D LoadTextureDXT(byte[] ddsBytes, TextureFormat format)
+    Texture2D DDSByteToTexture2D(byte[] ddsBytes)
     {
         byte ddsSizeCheck = ddsBytes[4];
         if (ddsSizeCheck != 124)
             throw new System.Exception("Invalid DDS DXTn texture. Unable to read");  // 确保是DDS格式
 
-        int height = ddsBytes[12] | ddsBytes[13] << 8 | ddsBytes[14] << 16 | ddsBytes[15] << 24;
-        int width = ddsBytes[16] | ddsBytes[17] << 8 | ddsBytes[18] << 16 | ddsBytes[19] << 24;
-
         int DDS_HEADER_SIZE = 128;
         int DDS_HEADER_DX10_SIZE = 20;
-        byte[] dxtBytes = new byte[ddsBytes.Length - DDS_HEADER_SIZE - DDS_HEADER_DX10_SIZE];//减去bc7的头148个字节，后面是纯bc7数据
-        System.Buffer.BlockCopy(ddsBytes, DDS_HEADER_SIZE + DDS_HEADER_DX10_SIZE, dxtBytes, 0, ddsBytes.Length - DDS_HEADER_SIZE - DDS_HEADER_DX10_SIZE);
 
-        Texture2D texture = new Texture2D(width, height, format, false); 
+        int height = ddsBytes[12] | ddsBytes[13] << 8 | ddsBytes[14] << 16 | ddsBytes[15] << 24;
+        int width = ddsBytes[16] | ddsBytes[17] << 8 | ddsBytes[18] << 16 | ddsBytes[19] << 24;
+        int mipMapCount = ddsBytes[28] | ddsBytes[29] << 8 | ddsBytes[30] << 16 | ddsBytes[31] << 24;
+        bool hasMipMaps = mipMapCount > 1;
+
+        int pfFourCC = ddsBytes[84] | ddsBytes[85] << 8 | ddsBytes[86] << 16 | ddsBytes[87] << 24;
+        bool hasDX10Header = (pfFourCC == ('D' | ('X' << 8) | ('1' << 16) | ('0' << 24)));
+
+        TextureFormat format = TextureFormat.RGBA32;
+        int headerSize = DDS_HEADER_SIZE;
+        if (hasDX10Header)
+        {
+            headerSize += DDS_HEADER_DX10_SIZE;
+            format = TextureFormat.BC7;
+        }
+        else
+        {
+            switch (pfFourCC)
+            {
+                case 0x31545844:
+                    format = TextureFormat.DXT1;
+                    break;
+                case 0x35545844:
+                    format = TextureFormat.DXT5;
+                    break;
+            }
+        }
+
+        byte[] dxtBytes = new byte[ddsBytes.Length - headerSize];//减去bc7的头148个字节，后面是纯bc7数据
+        System.Buffer.BlockCopy(ddsBytes, headerSize, dxtBytes, 0, ddsBytes.Length - headerSize);
+
+        Texture2D texture = new Texture2D(width, height, format, hasMipMaps); 
         texture.LoadRawTextureData(dxtBytes);//只把数据填充到m_TexData.data中即可
         texture.Apply();
 
         return texture;
     }
 
+    public static int splitMipLevel = 6;
     void BuildToLDAndHDBundle(Texture2D texture2D)
     {
-        Debug.Log("这张贴图只有一个mipmap，只会生成一个hd的二进制文件");
-        int splitMipLevel = 9;//随便填一个，反正只有一个hd文件
-
-        byte[] highResBytes = texture2D.GetStreamedBinaryData(true, splitMipLevel);
-        string folderPath = Path.Combine(Application.streamingAssetsPath, "BuildTextureBytes");
-        if (!Directory.Exists(folderPath))
+        //Build to _ld and _hd files
+        if (texture2D.mipmapCount == 1)
         {
-            Directory.CreateDirectory(folderPath);
+            Debug.Log("这张贴图只有一个mipmap，只会生成一个hd的二进制文件");
+
+            byte[] highResBytes = texture2D.GetStreamedBinaryData(true, splitMipLevel);
+            string folderPath = Path.Combine(Application.streamingAssetsPath, "BuildTextureBytes");
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+            else
+            {
+                DirectoryInfo di = new DirectoryInfo(folderPath);
+                foreach (FileInfo file in di.GetFiles())
+                {
+                    file.Delete();
+                }
+            }
+            string highResFilePath = Path.Combine(folderPath, texture2D.name + "_hd.bytes");
+
+            File.WriteAllBytes(highResFilePath, highResBytes);
+        }
+        else if (texture2D.mipmapCount < splitMipLevel + 2)
+        {
+            Debug.Log("要分离的splitMipLevel不是介于这张纹理的中间，请减少splitMipLevel后再分离，此次只会生成一个hd的二进制文件");
+
+            byte[] highResBytes = texture2D.GetStreamedBinaryData(true, splitMipLevel);
+            string folderPath = Path.Combine(Application.streamingAssetsPath, "BuildTextureBytes");
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+            else
+            {
+                DirectoryInfo di = new DirectoryInfo(folderPath);
+                foreach (FileInfo file in di.GetFiles())
+                {
+                    file.Delete();
+                }
+            }
+            string highResFilePath = Path.Combine(folderPath, texture2D.name + "_hd.bytes");
+
+            File.WriteAllBytes(highResFilePath, highResBytes);
         }
         else
         {
-            DirectoryInfo di = new DirectoryInfo(folderPath);
-            foreach (FileInfo file in di.GetFiles())
-            {
-                file.Delete();
-            }
-        }
-        string highResFilePath = Path.Combine(folderPath, texture2D.name + "_hd.bytes");
+            byte[] lowResBytes = texture2D.GetStreamedBinaryData(false, splitMipLevel);
+            byte[] highResBytes = texture2D.GetStreamedBinaryData(true, splitMipLevel);
 
-        File.WriteAllBytes(highResFilePath, highResBytes);
+            string folderPath = Path.Combine(Application.streamingAssetsPath, "BuildTextureBytes");
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+            else
+            {
+                DirectoryInfo di = new DirectoryInfo(folderPath);
+                foreach (FileInfo file in di.GetFiles())
+                {
+                    file.Delete();
+                }
+            }
+            string lowResFilePath = Path.Combine(folderPath, texture2D.name + "_ld.bytes");
+            string highResFilePath = Path.Combine(folderPath, texture2D.name + "_hd.bytes");
+
+            File.WriteAllBytes(lowResFilePath, lowResBytes);
+            File.WriteAllBytes(highResFilePath, highResBytes);
+        }
     }
 
 
     private Texture2D placeholderTex;
-    void ShowBinaryToUnityTexture2D()
+    void ShowBinaryToUnityTexture2D(string ldPath, string hdPath)
     {
         if (Input.GetKeyDown(KeyCode.L))
         {
-            string path = Path.Combine(Application.streamingAssetsPath, "BuildTextureBytes", "dxt5_ld.bytes");
+            string path = Path.Combine(Application.streamingAssetsPath, "BuildTextureBytes", ldPath);
             if (placeholderTex == null)
             {
                 placeholderTex = new Texture2D(8, 8);
@@ -168,7 +242,7 @@ public class ExternalProcessRunner : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.H))
         {
-            string path = Path.Combine(Application.streamingAssetsPath, "BuildTextureBytes", "_hd.bytes");
+            string path = Path.Combine(Application.streamingAssetsPath, "BuildTextureBytes", hdPath);
             if (placeholderTex == null)
             {
                 placeholderTex = new Texture2D(8, 8);
