@@ -8,10 +8,9 @@ using Debug = UnityEngine.Debug;
 public class ExternalProcessRunner : MonoBehaviour
 {
     // 定义文件和路径
-    private string executableName = @"D:\202405\TextureCompressionV1\bin\YaTCompress";
-    private string inputFilePath = "Assets/YahahaTextureCompress/0506BuildStep/input.png";
-    private string outputFilePath = "Assets/YahahaTextureCompress/0506BuildStep/bc7.dds";
-    //private string outputFilePath = "Assets/YahahaTextureCompress/0506BuildStep/astc6.astc";
+    private string executableName = @"E:\202405\YahahaTextureCompressionV1\bin\YaTCompress";  //公司电脑
+    //private string executableName = @"D:\202405\TextureCompressionV1\bin\YaTCompress"; //家中电脑
+
 
     public Material quadMat;
 
@@ -23,10 +22,14 @@ public class ExternalProcessRunner : MonoBehaviour
             string inputFilePath = "Assets/YahahaTextureCompress/0506BuildStep/input.png";
             string outputFilePath = "Assets/YahahaTextureCompress/0506BuildStep/bc3.dds";
             LaunchTextureCompression(inputFilePath, outputFilePath, CompressionType.BC3, new List<string>() { "-mipmap" });
+            //astc
+            //string outputFilePath = "Assets/YahahaTextureCompress/0506BuildStep/a4_mip.astc";
+            //LaunchTextureCompression(inputFilePath, outputFilePath, CompressionType.ASTC_4x4, new List<string>() { "-mipmap" });
 
             //step2: x.dds -> texture2D in memory
             var ddsBytes = File.ReadAllBytes(outputFilePath);
             Texture2D tex2D = DDSByteToTexture2D(ddsBytes);
+            //Texture2D tex2D = ASTCByteToTexture2D(ddsBytes);
 
             //step3: texture2D in memory -> _ld.bytes and _hd.bytes
             BuildToLDAndHDBundle(tex2D);
@@ -149,6 +152,53 @@ public class ExternalProcessRunner : MonoBehaviour
 
         return texture;
     }
+
+    private const int ASTC_HEADER_SIZE = 16;
+    public Texture2D ASTCByteToTexture2D(byte[] astcBytes)
+    {
+        if (astcBytes[0] != 0x13 || astcBytes[1] != 0xAB || astcBytes[2] != 0xA1 || astcBytes[3] != 0x5C)
+            throw new System.Exception("Invalid ASTC texture. Unable to read"); // 确保是ASTC格式
+
+        int blockWidth = astcBytes[4];
+        int blockHeight = astcBytes[5];
+
+        // 读取纹理尺寸
+        int width = astcBytes[9] | (astcBytes[8] << 8) | (astcBytes[7] << 16);
+        int height = astcBytes[12] | (astcBytes[11] << 8) | (astcBytes[10] << 16);
+
+        // 获取对应的TextureFormat
+        TextureFormat format = GetASTCTextureFormat(blockWidth, blockHeight);
+
+        // 计算无Mipmap的理论最小文件大小
+        int blockSize = blockWidth * blockHeight * 16 / 8; // 每个块编码为128位
+        int numBlocksWide = (width + blockWidth - 1) / blockWidth;
+        int numBlocksHigh = (height + blockHeight - 1) / blockHeight;
+        int minSize = numBlocksWide * numBlocksHigh * 16 + ASTC_HEADER_SIZE;
+
+        // 确定是否有Mipmap
+        bool hasMipMaps = astcBytes.Length > minSize;
+
+        // 创建Texture2D对象
+        Texture2D texture = new Texture2D(width, height, format, hasMipMaps);
+
+        // 拷贝除头部外的数据
+        byte[] astcData = new byte[astcBytes.Length - ASTC_HEADER_SIZE];
+        System.Buffer.BlockCopy(astcBytes, ASTC_HEADER_SIZE, astcData, 0, astcBytes.Length - ASTC_HEADER_SIZE);
+
+        // 加载纹理数据
+        texture.LoadRawTextureData(astcData);
+        texture.Apply();
+
+        return texture;
+    }
+    private TextureFormat GetASTCTextureFormat(int blockWidth, int blockHeight)
+    {
+        if (blockWidth == 4 && blockHeight == 4) return TextureFormat.ASTC_4x4;
+        if (blockWidth == 5 && blockHeight == 5) return TextureFormat.ASTC_5x5;
+        if (blockWidth == 6 && blockHeight == 6) return TextureFormat.ASTC_6x6;
+        throw new System.Exception($"Unsupported ASTC block size: {blockWidth}x{blockHeight}");
+    }
+
 
     public static int splitMipLevel = 6;
     void BuildToLDAndHDBundle(Texture2D texture2D)
