@@ -11,25 +11,24 @@ public class ExternalProcessRunner : MonoBehaviour
     private string executableName = @"E:\202405\YahahaTextureCompressionV1\bin\YaTCompress";  //公司电脑
     //private string executableName = @"D:\202405\TextureCompressionV1\bin\YaTCompress"; //家中电脑
 
-
     public Material quadMat;
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
+            bool dxtOrAstc = true;
+
             //step1: input.png -> x.dds
             string inputFilePath = "Assets/YahahaTextureCompress/0506BuildStep/input.png";
-            string outputFilePath = "Assets/YahahaTextureCompress/0506BuildStep/bc3.dds";
-            LaunchTextureCompression(inputFilePath, outputFilePath, CompressionType.BC3, new List<string>() { "-mipmap" });
-            //astc
-            //string outputFilePath = "Assets/YahahaTextureCompress/0506BuildStep/a4_mip.astc";
-            //LaunchTextureCompression(inputFilePath, outputFilePath, CompressionType.ASTC_4x4, new List<string>() { "-mipmap" });
+            string outputFilePath = dxtOrAstc ? "Assets/YahahaTextureCompress/0506BuildStep/bc3_mip.dds"
+                                              : "Assets/YahahaTextureCompress/0506BuildStep/a4_mip.astc";
+            CompressionType compressionType = dxtOrAstc ? CompressionType.BC3 : CompressionType.ASTC_4x4;
+            LaunchTextureCompression(inputFilePath, outputFilePath, compressionType, new List<string>() { "-mipmap" });
 
             //step2: x.dds -> texture2D in memory
-            var ddsBytes = File.ReadAllBytes(outputFilePath);
-            Texture2D tex2D = DDSByteToTexture2D(ddsBytes);
-            //Texture2D tex2D = ASTCByteToTexture2D(ddsBytes);
+            var compressedBytes = File.ReadAllBytes(outputFilePath);
+            Texture2D tex2D = dxtOrAstc ? DDSByteToTexture2D(compressedBytes) : ASTCByteToTexture2D(compressedBytes);
 
             //step3: texture2D in memory -> _ld.bytes and _hd.bytes
             BuildToLDAndHDBundle(tex2D);
