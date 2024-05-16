@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using Unity.Collections;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -15,6 +16,20 @@ public class ExternalProcessRunner : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            //int r = ProcessStartDLL.StartProcess(executableName);
+            //Debug.Log(r);
+
+            bool dxtOrAstc = true;
+            string inputFilePath = "Assets/YahahaTextureCompress/0506BuildStep/input.png";
+            string outputFilePath = dxtOrAstc ? "Assets/YahahaTextureCompress/0506BuildStep/bc3_mip.dds"
+                                              : "Assets/YahahaTextureCompress/0506BuildStep/a4_mip.astc";
+            CompressionType compressionType = dxtOrAstc ? CompressionType.BC3 : CompressionType.ASTC_4x4;
+            LaunchTextureCompression2(inputFilePath, outputFilePath, compressionType, new List<string>() { "-mipmap" });
+        }
+
+
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             bool dxtOrAstc = true;
@@ -24,7 +39,8 @@ public class ExternalProcessRunner : MonoBehaviour
             string outputFilePath = dxtOrAstc ? "Assets/YahahaTextureCompress/0506BuildStep/bc3_mip.dds"
                                               : "Assets/YahahaTextureCompress/0506BuildStep/a4_mip.astc";
             CompressionType compressionType = dxtOrAstc ? CompressionType.BC3 : CompressionType.ASTC_4x4;
-            LaunchTextureCompression(inputFilePath, outputFilePath, compressionType, new List<string>() { "-mipmap" });
+            //LaunchTextureCompression(inputFilePath, outputFilePath, compressionType, new List<string>() { "-mipmap" });
+            LaunchTextureCompression2(inputFilePath, outputFilePath, compressionType, new List<string>() { "-mipmap" });
 
             //step2: x.dds -> texture2D in memory
             var compressedBytes = File.ReadAllBytes(outputFilePath);
@@ -104,6 +120,31 @@ public class ExternalProcessRunner : MonoBehaviour
             Debug.LogError("Exception occurred: " + e.Message);
         }
     }
+
+    void LaunchTextureCompression2(string inputFilePath, string outputFilePath, CompressionType compressionType, List<string> additionalArgs = null)
+    {
+        // 获取绝对路径
+        string absoluteInputPath = System.IO.Path.GetFullPath(inputFilePath);
+        string absoluteOutputPath = System.IO.Path.GetFullPath(outputFilePath);
+
+        string arguments = GetCompressionArguments(compressionType, absoluteInputPath, absoluteOutputPath, additionalArgs);
+        string command = executableName + " " + arguments;
+
+        StringBuilder output = new StringBuilder(4096);
+        int result = ProcessStartDLL.StartProcessWithCommand(command);
+
+        if (result == 0) // Check process exit code
+        {
+            Debug.Log("Process completed successfully.");
+            Debug.Log("Generated file: " + absoluteOutputPath);
+            Debug.Log("Output: " + output.ToString());
+        }
+        else
+        {
+            Debug.LogError("Process failed.");
+        }
+    }
+
 
     Texture2D DDSByteToTexture2D(byte[] ddsBytes)
     {
@@ -279,7 +320,8 @@ public class ExternalProcessRunner : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.L))
         {
-            string path = Path.Combine(Application.streamingAssetsPath, "BuildTextureBytes", ldPath);
+            //string path = Path.Combine(Application.streamingAssetsPath, "BuildTextureBytes", ldPath);
+            string path = @"E:\202312\" + ldPath;
             if (placeholderTex == null)
             {
                 placeholderTex = new Texture2D(8, 8);
