@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Threading;
 using Unity.Collections;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -13,6 +14,8 @@ public class ExternalProcessRunner : MonoBehaviour
     //private string executableName = @"D:\202405\TextureCompressionV1\bin\YaTCompress"; //家中电脑
 
     public Material quadMat;
+
+    private object lockObject = new object(); //用于测试多进程为什么会互相影响 --- 因为CPU满了，单个astc就占满了
 
     private void Update()
     {
@@ -48,6 +51,60 @@ public class ExternalProcessRunner : MonoBehaviour
 
             //step3: texture2D in memory -> _ld.bytes and _hd.bytes
             BuildToLDAndHDBundle(tex2D);
+        }
+
+        //测试压缩时间，多进程之间影响
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            bool dxtOrAstc = false;
+
+            int cnt = 4;
+            for (int i = 0; i < cnt; i++)
+            {
+                string inputFilePath = "Assets/YahahaTextureCompress/0506BuildStep/input.png";
+                string outputFilePath = dxtOrAstc ? "Assets/YahahaTextureCompress/0506BuildStep/bc3_mip" + i + ".dds"
+                                                  : "Assets/YahahaTextureCompress/0506BuildStep/a4_mip" + i + ".astc";
+                CompressionType compressionType = dxtOrAstc ? CompressionType.BC3 : CompressionType.ASTC_4x4;
+                LaunchTextureCompression2(inputFilePath, outputFilePath, compressionType, new List<string>() { "-mipmap" });
+            }
+
+            stopwatch.Stop();
+            UnityEngine.Debug.Log("Execution Time: " + stopwatch.ElapsedMilliseconds + " ms");
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            int cnt = 4;
+
+            for (int i = 0; i < cnt; i++)
+            {
+                //string inputFilePath = $"Assets/YahahaTextureCompress/0506BuildStep/input{i}.png";
+                string inputFilePath = $"Assets/YahahaTextureCompress/0506BuildStep/input.png";
+                bool dxtOrAstc = false;
+                string outputFilePath = dxtOrAstc ? $"Assets/YahahaTextureCompress/0506BuildStep/bc3_mip{i}.dds"
+                                                  : $"Assets/YahahaTextureCompress/0506BuildStep/a4_mip{i}.astc";
+                CompressionType compressionType = dxtOrAstc ? CompressionType.BC3 : CompressionType.ASTC_4x4;
+
+                // 创建并启动新线程
+                Thread thread = new Thread(() =>
+                {
+                    Stopwatch threadStopwatch = new Stopwatch(); // 为每个线程创建一个新的计时器
+                    threadStopwatch.Start();
+
+                    LaunchTextureCompression2(inputFilePath, outputFilePath, compressionType, new List<string>() { "-mipmap" });
+
+                    threadStopwatch.Stop(); // 停止计时
+
+                    lock (lockObject)
+                    {
+                        UnityEngine.Debug.Log($"Thread for {outputFilePath} completed in {threadStopwatch.ElapsedMilliseconds} ms");
+                    }
+                });
+                thread.Start();
+            }
         }
 
         //测试：从二进制文件加载出来，显示这张图
@@ -320,8 +377,8 @@ public class ExternalProcessRunner : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.L))
         {
-            //string path = Path.Combine(Application.streamingAssetsPath, "BuildTextureBytes", ldPath);
-            string path = @"E:\202312\" + ldPath;
+            string path = Path.Combine(Application.streamingAssetsPath, "BuildTextureBytes", ldPath);
+            //string path = @"E:\202312\" + ldPath;
             if (placeholderTex == null)
             {
                 placeholderTex = new Texture2D(8, 8);
@@ -329,7 +386,8 @@ public class ExternalProcessRunner : MonoBehaviour
             }
 
             NativeArray<byte> ldBytes = Texture2D.ReadTextureDataFromFile(path);
-            placeholderTex.SetStreamedBinaryData(ldBytes);
+            if (ldBytes.Length > 0)
+                placeholderTex.SetStreamedBinaryData(ldBytes);
         }
         if (Input.GetKeyDown(KeyCode.H))
         {
@@ -341,7 +399,8 @@ public class ExternalProcessRunner : MonoBehaviour
             }
 
             NativeArray<byte> hdBytes = Texture2D.ReadTextureDataFromFile(path);
-            placeholderTex.SetStreamedBinaryData(hdBytes);
+            if (hdBytes.Length > 0)
+                placeholderTex.SetStreamedBinaryData(hdBytes);
         }
     }
 }
