@@ -10,9 +10,11 @@ using Debug = UnityEngine.Debug;
 public class ExternalProcessRunner : MonoBehaviour
 {
     // 定义文件和路径
-    private string executableName = @"E:\202405\YahahaTextureCompressionV1\bin\YaTCompress";  //公司电脑
+    //private string executableName = @"E:\202405\YahahaTextureCompressionV1\bin\YaTCompress";  //公司电脑
     //private string executableName = @"D:\202405\TextureCompressionV1\bin\YaTCompress"; //家中电脑
-
+    private string executableName = "/Users/hexueqiang/Documents/202404/TextureCompressionV1/bin/YaTCompress";//mac
+    
+    
     public Material quadMat;
 
     private object lockObject = new object(); //用于测试多进程为什么会互相影响 --- 因为CPU满了，单个astc就占满了
@@ -104,7 +106,7 @@ public class ExternalProcessRunner : MonoBehaviour
             UnityEngine.Debug.Log("Execution Time: " + stopwatch.ElapsedMilliseconds + " ms");
         }
 
-        if (Input.GetKeyDown(KeyCode.L))
+        if (Input.GetKeyDown(KeyCode.P))
         {
             int cnt = 4;
 
