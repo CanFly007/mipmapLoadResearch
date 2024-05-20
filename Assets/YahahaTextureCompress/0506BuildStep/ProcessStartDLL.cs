@@ -3,9 +3,17 @@ using System.Text;
 
 public static class ProcessStartDLL
 {
-    [DllImport("PlatformDependentProcessDLL01")]
+
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+    private const string libName = "PlatformDependentProcessDLL01";
+#elif UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX
+    private const string libName = "libprocess";
+#endif
+    
+    // 使用 libName 常量作为 DLL 名称
+    [DllImport(libName, EntryPoint = "StartProcess", CharSet = CharSet.Unicode)]
     public static extern int StartProcess(string path);
 
-    [DllImport("PlatformDependentProcessDLL01", CharSet = CharSet.Unicode)]
+    [DllImport(libName, EntryPoint = "StartProcessWithCommand", CharSet = CharSet.Unicode)]
     public static extern int StartProcessWithCommand(string command);
 }
