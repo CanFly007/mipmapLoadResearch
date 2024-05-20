@@ -53,8 +53,23 @@ public class ExternalProcessRunner : MonoBehaviour
             BuildToLDAndHDBundle(tex2D);
         }
 
+
+        //测试压缩文件即.dds在unity项目外部时候，File.ReadAllBytes能读取到里面的二进制吗？
+        //可以读取成功
+        //但是好像macos不可以，upload后在macos尝试看下
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            string anSystemPath = @"E:\202405\YahahaTextureCompressionV1\bin/b3_mip.dds";
+            var compressedBytes = File.ReadAllBytes(anSystemPath);
+            Texture2D tex2D = DDSByteToTexture2D(compressedBytes);
+            quadMat.mainTexture = tex2D;
+        }
+
+
+
+        #region 测试压缩时间，多进程之间影响。也可以在C#端起很多线程，每个线程调用tc.exe
         //测试压缩时间，多进程之间影响
-        if (Input.GetKeyDown(KeyCode.Alpha2))
+        if (Input.GetKeyDown(KeyCode.P))
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -75,7 +90,7 @@ public class ExternalProcessRunner : MonoBehaviour
             UnityEngine.Debug.Log("Execution Time: " + stopwatch.ElapsedMilliseconds + " ms");
         }
 
-        if (Input.GetKeyDown(KeyCode.Alpha3))
+        if (Input.GetKeyDown(KeyCode.L))
         {
             int cnt = 4;
 
@@ -106,6 +121,7 @@ public class ExternalProcessRunner : MonoBehaviour
                 thread.Start();
             }
         }
+        #endregion
 
         //测试：从二进制文件加载出来，显示这张图
         ShowBinaryToUnityTexture2D("_ld.bytes", "_hd.bytes");
