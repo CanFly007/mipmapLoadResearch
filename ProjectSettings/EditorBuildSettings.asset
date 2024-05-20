@@ -20,7 +20,10 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/mipmapLoad.unity
     guid: c871f5d21718ceb40aa55848454b09a3
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/mipmapLoad100.unity
     guid: 5243fb04b24481b459436b6e72e6a6ef
+  - enabled: 1
+    path: Assets/YahahaTextureCompress/0506BuildStep/build.unity
+    guid: cfbf8634c97a8c74aafdcab09cf494bf
   m_configObjects: {}

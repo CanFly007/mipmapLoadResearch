@@ -57,9 +57,18 @@ public class ExternalProcessRunner : MonoBehaviour
         //测试压缩文件即.dds在unity项目外部时候，File.ReadAllBytes能读取到里面的二进制吗？
         //可以读取成功
         //但是好像macos不可以，upload后在macos尝试看下
-        if (Input.GetKeyDown(KeyCode.M))
+        //macos访问普通的目录，editor可以。macPlayer会在按2后，询问是否给权限，如果不给权限，会报错，给权限则成功访问贴图
+        //测试temporaryCachePath是否要权限？ mac上地址：/var/folders/sv/ljvbmhvd44q94nn_1s9xbg6h0000gn/T/DefaultCompany/MipmapLoadResearch
+        //有点奇怪，用persistentDataPath代替吧 mac上地址：/Users/hexueqiang/Library/Application Support/DefaultCompany/MipmapLoadResearch
+        if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-            string anSystemPath = @"E:\202405\YahahaTextureCompressionV1\bin/b3_mip.dds";
+            Debug.Log(Application.persistentDataPath);
+            //string anSystemPath = @"E:\202405\YahahaTextureCompressionV1\bin/b3_mip.dds";
+            
+            // string homePath = System.Environment.GetEnvironmentVariable("HOME");
+            // string anSystemPath = System.IO.Path.Combine(homePath, "Documents/202403/bc3_mip.dds");
+
+            string anSystemPath = Path.Combine(Application.persistentDataPath, "bc3_mip.dds");
             var compressedBytes = File.ReadAllBytes(anSystemPath);
             Texture2D tex2D = DDSByteToTexture2D(compressedBytes);
             quadMat.mainTexture = tex2D;
