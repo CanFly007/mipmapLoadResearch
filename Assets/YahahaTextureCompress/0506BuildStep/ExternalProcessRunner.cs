@@ -39,8 +39,12 @@ public class ExternalProcessRunner : MonoBehaviour
 
             //step1: input.png -> x.dds
             string inputFilePath = "Assets/YahahaTextureCompress/0506BuildStep/input.png";
-            string outputFilePath = dxtOrAstc ? "Assets/YahahaTextureCompress/0506BuildStep/bc3_mip.dds"
-                                              : "Assets/YahahaTextureCompress/0506BuildStep/a4_mip.astc";
+            //string outputFilePath = dxtOrAstc ? "Assets/YahahaTextureCompress/0506BuildStep/bc3_mip.dds"
+            //                                  : "Assets/YahahaTextureCompress/0506BuildStep/a4_mip.astc";
+            string outputFilePath = dxtOrAstc ? Path.Combine(Application.persistentDataPath, "bc3_mip.dds")
+                : Path.Combine(Application.persistentDataPath, "a4_mip.astc");
+
+
             CompressionType compressionType = dxtOrAstc ? CompressionType.BC3 : CompressionType.ASTC_4x4;
             //LaunchTextureCompression(inputFilePath, outputFilePath, compressionType, new List<string>() { "-mipmap" });
             LaunchTextureCompression2(inputFilePath, outputFilePath, compressionType, new List<string>() { "-mipmap" });
@@ -60,11 +64,12 @@ public class ExternalProcessRunner : MonoBehaviour
         //macos访问普通的目录，editor可以。macPlayer会在按2后，询问是否给权限，如果不给权限，会报错，给权限则成功访问贴图
         //测试temporaryCachePath是否要权限？ mac上地址：/var/folders/sv/ljvbmhvd44q94nn_1s9xbg6h0000gn/T/DefaultCompany/MipmapLoadResearch
         //有点奇怪，用persistentDataPath代替吧 mac上地址：/Users/hexueqiang/Library/Application Support/DefaultCompany/MipmapLoadResearch
+        //persistentDataPath在win上的地址：C:/Users/56399/AppData/LocalLow/DefaultCompany/MipmapLoadResearch
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             Debug.Log(Application.persistentDataPath);
             //string anSystemPath = @"E:\202405\YahahaTextureCompressionV1\bin/b3_mip.dds";
-            
+
             // string homePath = System.Environment.GetEnvironmentVariable("HOME");
             // string anSystemPath = System.IO.Path.Combine(homePath, "Documents/202403/bc3_mip.dds");
 
