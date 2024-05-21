@@ -10,9 +10,9 @@ using Debug = UnityEngine.Debug;
 public class ExternalProcessRunner : MonoBehaviour
 {
     // 定义文件和路径
-    //private string executableName = @"E:\202405\YahahaTextureCompressionV1\bin\YaTCompress";  //公司电脑
+    private string executableName = @"E:\202405\YahahaTextureCompressionV1\bin\YaTCompress";  //公司电脑
     //private string executableName = @"D:\202405\TextureCompressionV1\bin\YaTCompress"; //家中电脑
-    private string executableName = "/Users/hexueqiang/Documents/202404/TextureCompressionV1/bin/YaTCompress";//mac
+    //private string executableName = "/Users/hexueqiang/Documents/202404/TextureCompressionV1/bin/YaTCompress";//mac
     
     
     public Material quadMat;
@@ -21,45 +21,28 @@ public class ExternalProcessRunner : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            //int r = ProcessStartDLL.StartProcess(executableName);
-            //Debug.Log(r);
-
-            bool dxtOrAstc = true;
-            string inputFilePath = "Assets/YahahaTextureCompress/0506BuildStep/input.png";
-            string outputFilePath = dxtOrAstc ? "Assets/YahahaTextureCompress/0506BuildStep/bc3_mip.dds"
-                                              : "Assets/YahahaTextureCompress/0506BuildStep/a4_mip.astc";
-            CompressionType compressionType = dxtOrAstc ? CompressionType.BC3 : CompressionType.ASTC_4x4;
-            LaunchTextureCompression2(inputFilePath, outputFilePath, compressionType, new List<string>() { "-mipmap" });
-        }
-
-
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             bool dxtOrAstc = true;
 
-            //step1: input.png -> x.dds
+            //步骤1，unity工程下的一张png，通过YaTCompress.exe 压缩成persistentDataPath路径下的temp.dds
             string inputFilePath = "Assets/YahahaTextureCompress/0506BuildStep/input.png";
-            //string outputFilePath = dxtOrAstc ? "Assets/YahahaTextureCompress/0506BuildStep/bc3_mip.dds"
-            //                                  : "Assets/YahahaTextureCompress/0506BuildStep/a4_mip.astc";
-            string outputFilePath = dxtOrAstc ? Path.Combine(Application.persistentDataPath, "bc3_mip.dds")
-                : Path.Combine(Application.persistentDataPath, "a4_mip.astc");
-
+            string outputFilePath = dxtOrAstc ? Path.Combine(Application.persistentDataPath, "temp.dds")
+                                              : Path.Combine(Application.persistentDataPath, "temp.astc");
 
             CompressionType compressionType = dxtOrAstc ? CompressionType.BC3 : CompressionType.ASTC_4x4;
-            //LaunchTextureCompression(inputFilePath, outputFilePath, compressionType, new List<string>() { "-mipmap" });
             LaunchTextureCompression2(inputFilePath, outputFilePath, compressionType, new List<string>() { "-mipmap" });
 
-            //step2: x.dds -> texture2D in memory
+            //步骤2，外部的压缩后文件，转成unity的Texture2D类型对象。x.dds -> texture2D in memory
             var compressedBytes = File.ReadAllBytes(outputFilePath);
             Texture2D tex2D = dxtOrAstc ? DDSByteToTexture2D(compressedBytes) : ASTCByteToTexture2D(compressedBytes);
+            tex2D.name = Path.GetFileNameWithoutExtension(inputFilePath);
 
-            //step3: texture2D in memory -> _ld.bytes and _hd.bytes
+            //步骤3，texture2D对象，转成两个bytes对象。texture2D in memory -> _ld.bytes and _hd.bytes
             BuildToLDAndHDBundle(tex2D);
         }
 
-
+        #region 测试persistentDataPath等路径下，mac平台打包后的使用情况
         //测试压缩文件即.dds在unity项目外部时候，File.ReadAllBytes能读取到里面的二进制吗？
         //可以读取成功
         //但是好像macos不可以，upload后在macos尝试看下
@@ -80,8 +63,7 @@ public class ExternalProcessRunner : MonoBehaviour
             Texture2D tex2D = DDSByteToTexture2D(compressedBytes);
             quadMat.mainTexture = tex2D;
         }
-
-
+        #endregion
 
         #region 测试压缩时间，多进程之间影响。也可以在C#端起很多线程，每个线程调用tc.exe
         //测试压缩时间，多进程之间影响
@@ -140,7 +122,7 @@ public class ExternalProcessRunner : MonoBehaviour
         #endregion
 
         //测试：从二进制文件加载出来，显示这张图
-        ShowBinaryToUnityTexture2D("_ld.bytes", "_hd.bytes");
+        ShowBinaryToUnityTexture2D("input_ld.bytes", "input_hd.bytes");
     }
 
     public enum CompressionType
