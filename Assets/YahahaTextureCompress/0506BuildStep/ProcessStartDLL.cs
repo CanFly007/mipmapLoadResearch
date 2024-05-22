@@ -14,6 +14,6 @@ public static class ProcessStartDLL
     [DllImport(libName, EntryPoint = "StartProcess", CharSet = CharSet.Auto)]
     public static extern int StartProcess(string path);
 
-    [DllImport(libName, EntryPoint = "StartProcessWithCommand", CharSet = CharSet.Auto)]
+    [DllImport(libName, EntryPoint = "StartProcessWithCommand", CharSet = CharSet.Ansi)]
     public static extern int StartProcessWithCommand(string command);
 }
