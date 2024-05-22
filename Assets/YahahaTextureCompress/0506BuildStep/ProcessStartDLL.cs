@@ -11,9 +11,9 @@ public static class ProcessStartDLL
 #endif
     
     // 使用 libName 常量作为 DLL 名称
-    [DllImport(libName, EntryPoint = "StartProcess", CharSet = CharSet.Unicode)]
+    [DllImport(libName, EntryPoint = "StartProcess", CharSet = CharSet.Auto)]
     public static extern int StartProcess(string path);
 
-    [DllImport(libName, EntryPoint = "StartProcessWithCommand", CharSet = CharSet.Unicode)]
+    [DllImport(libName, EntryPoint = "StartProcessWithCommand", CharSet = CharSet.Auto)]
     public static extern int StartProcessWithCommand(string command);
 }
