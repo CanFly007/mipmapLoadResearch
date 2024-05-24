@@ -1,0 +1,1 @@
+mklink /D "E:\202312\MipmapLoadResearch\Assets\Plugins\IPCPlugins" "E:\202405\ipc\unity\Plugins"
