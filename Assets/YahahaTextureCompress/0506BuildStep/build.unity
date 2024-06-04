@@ -248,7 +248,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f43740109d8df684e8a91734df865fad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  quadMat: {fileID: 2100000, guid: 8a061f4f07284324f970632d0f645527, type: 2}
+  showMat: {fileID: 2100000, guid: 8a061f4f07284324f970632d0f645527, type: 2}
   asObject: {fileID: 102900000, guid: 96d9045d5d65ae3459e03bf94a64d34a, type: 3}
 --- !u!114 &664107973
 MonoBehaviour:
@@ -262,6 +262,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b7843db116ce1a4b88a73d2b77c5b83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showMat: {fileID: 2100000, guid: 8a061f4f07284324f970632d0f645527, type: 2}
 --- !u!1 &1721111015
 GameObject:
   m_ObjectHideFlags: 0

@@ -31,7 +31,7 @@ public class AssetBundleLoader100 : MonoBehaviour
 
     private void Start()
     {
-        MAX_BYTES_PER_FRAME = QualitySettings.texture2DReadBufferSize * 1024 * 1024;
+        MAX_BYTES_PER_FRAME = QualitySettings.asTextureReadBufferSize * 1024 * 1024;
         folderPath = Path.Combine(Application.streamingAssetsPath, "TextureBytes100");
         UpdateQuads();
     }
@@ -81,7 +81,7 @@ public class AssetBundleLoader100 : MonoBehaviour
         if (mipmapLevel.HasValue == false)
             bytes = Texture2D.ReadTextureDataFromFile(path);
         else
-            bytes = Texture2D.ReadTextureDataFromFile2(path, mipmapLevel.Value, texture);
+            bytes = Texture2D.ReadTextureDataFromFile(path, mipmapLevel.Value, texture);
         return bytes;
     }
 
@@ -113,7 +113,7 @@ public class AssetBundleLoader100 : MonoBehaviour
                     if(mipmapLevel.HasValue == false)
                         texture.SetStreamedBinaryData(uploadBytes);
                     else
-                        texture.ForceSetMipLevel4(mipmapLevel.Value, uploadBytes);
+                        texture.ForceSetMipLevel(mipmapLevel.Value, uploadBytes);
                 }
                 pendingUploads.Clear();
                 currentFrameBytes = 0;
@@ -131,7 +131,7 @@ public class AssetBundleLoader100 : MonoBehaviour
             if (mipmapLevel.HasValue == false)
                 texture.SetStreamedBinaryData(uploadBytes);
             else
-                texture.ForceSetMipLevel4(mipmapLevel.Value, uploadBytes);
+                texture.ForceSetMipLevel(mipmapLevel.Value, uploadBytes);
         }
     }
 

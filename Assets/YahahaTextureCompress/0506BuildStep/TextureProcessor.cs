@@ -59,198 +59,198 @@ public class TextureProcessor : MonoBehaviour
 
     void BuildTextureBytes()
     {
-        Texture2D texture = LoadAndConvertImage(imagePath);
-        if (texture != null)
-        {
-            byte[] rgba32Data = ConvertToRGBA32(texture);
-            // 在这里，rgba32Data包含了纯RGBA32格式的像素数据
+        //Texture2D texture = LoadAndConvertImage(imagePath);
+        //if (texture != null)
+        //{
+        //    byte[] rgba32Data = ConvertToRGBA32(texture);
+        //    // 在这里，rgba32Data包含了纯RGBA32格式的像素数据
 
 
-            int width = texture.width;
-            int height = texture.height;
+        //    int width = texture.width;
+        //    int height = texture.height;
 
 
 
-            // 初始化 RGBA32 数据和 Mipmap 数组
-            byte[][] mipmaps = new byte[32][]; // 假设最大 Mipmap 级别为 32
-            mipmaps[0] = rgba32Data;
-            int num_levels = 1;
-            int currentWidth = width;
-            int currentHeight = height;
+        //    // 初始化 RGBA32 数据和 Mipmap 数组
+        //    byte[][] mipmaps = new byte[32][]; // 假设最大 Mipmap 级别为 32
+        //    mipmaps[0] = rgba32Data;
+        //    int num_levels = 1;
+        //    int currentWidth = width;
+        //    int currentHeight = height;
 
-            while (currentWidth > 1 || currentHeight > 1)
-            {
-                int newWidth = Math.Max(1, currentWidth / 2);
-                int newHeight = Math.Max(1, currentHeight / 2);
+        //    while (currentWidth > 1 || currentHeight > 1)
+        //    {
+        //        int newWidth = Math.Max(1, currentWidth / 2);
+        //        int newHeight = Math.Max(1, currentHeight / 2);
 
-                mipmaps[num_levels] = GenerateMipmap(mipmaps[num_levels - 1], currentWidth, currentHeight, 4, out newWidth, out newHeight);
-                currentWidth = newWidth;
-                currentHeight = newHeight;
-                num_levels++;
+        //        mipmaps[num_levels] = GenerateMipmap(mipmaps[num_levels - 1], currentWidth, currentHeight, 4, out newWidth, out newHeight);
+        //        currentWidth = newWidth;
+        //        currentHeight = newHeight;
+        //        num_levels++;
 
-                if (newWidth == 1 && newHeight == 1) 
-                    break;
-            }
+        //        if (newWidth == 1 && newHeight == 1) 
+        //            break;
+        //    }
 
-            Texture2D compressedTexture = new Texture2D(width, height, TextureFormat.DXT5, true);
-            compressedTexture.name = "dxt5";
+        //    Texture2D compressedTexture = new Texture2D(width, height, TextureFormat.DXT5, true);
+        //    compressedTexture.name = "dxt5";
 
-            for (int i = 0; i < num_levels; i++)
-            {
-                currentWidth = Math.Max(1, width >> i);  // 右移操作用于计算 Mipmap 级别的宽度
-                currentHeight = Math.Max(1, height >> i);  // 右移操作用于计算 Mipmap 级别的高度
+        //    for (int i = 0; i < num_levels; i++)
+        //    {
+        //        currentWidth = Math.Max(1, width >> i);  // 右移操作用于计算 Mipmap 级别的宽度
+        //        currentHeight = Math.Max(1, height >> i);  // 右移操作用于计算 Mipmap 级别的高度
 
-                IntPtr unmanagedInput = Marshal.AllocHGlobal(mipmaps[i].Length);
-                Marshal.Copy(mipmaps[i], 0, unmanagedInput, mipmaps[i].Length);
+        //        IntPtr unmanagedInput = Marshal.AllocHGlobal(mipmaps[i].Length);
+        //        Marshal.Copy(mipmaps[i], 0, unmanagedInput, mipmaps[i].Length);
 
-                int blockSize = 16; // BC3 压缩到 16 字节每 4x4 块
-                int num_blocks_wide = (currentWidth + 3) / 4;
-                int num_blocks_high = (currentHeight + 3) / 4;
-                int blockCount = num_blocks_wide * num_blocks_high;
-                IntPtr unmanagedOutput = Marshal.AllocHGlobal(blockCount * blockSize);
+        //        int blockSize = 16; // BC3 压缩到 16 字节每 4x4 块
+        //        int num_blocks_wide = (currentWidth + 3) / 4;
+        //        int num_blocks_high = (currentHeight + 3) / 4;
+        //        int blockCount = num_blocks_wide * num_blocks_high;
+        //        IntPtr unmanagedOutput = Marshal.AllocHGlobal(blockCount * blockSize);
 
-                RgbaSurface surfaceInput = new RgbaSurface
-                {
-                    ptr = unmanagedInput,
-                    width = currentWidth,
-                    height = currentHeight,
-                    stride = currentWidth * 4 // 4 bytes per pixel
-                };
+        //        RgbaSurface surfaceInput = new RgbaSurface
+        //        {
+        //            ptr = unmanagedInput,
+        //            width = currentWidth,
+        //            height = currentHeight,
+        //            stride = currentWidth * 4 // 4 bytes per pixel
+        //        };
 
-                IntPtr unmanagedSurfaceInput = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(RgbaSurface)));
-                Marshal.StructureToPtr(surfaceInput, unmanagedSurfaceInput, false);
+        //        IntPtr unmanagedSurfaceInput = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(RgbaSurface)));
+        //        Marshal.StructureToPtr(surfaceInput, unmanagedSurfaceInput, false);
 
-                TextureCompression.CompressBlocksBC3(unmanagedSurfaceInput, unmanagedOutput);
+        //        TextureCompression.CompressBlocksBC3(unmanagedSurfaceInput, unmanagedOutput);
 
-                byte[] compressedData = new byte[blockCount * blockSize];
-                Marshal.Copy(unmanagedOutput, compressedData, 0, compressedData.Length);
+        //        byte[] compressedData = new byte[blockCount * blockSize];
+        //        Marshal.Copy(unmanagedOutput, compressedData, 0, compressedData.Length);
 
-                //compressedTexture.LoadRawTextureData(compressedData);
-                compressedTexture.LoadRawTextureData(unmanagedOutput, blockCount * blockSize, i);
+        //        //compressedTexture.LoadRawTextureData(compressedData);
+        //        compressedTexture.LoadRawTextureData(unmanagedOutput, blockCount * blockSize, i);
 
-                Marshal.FreeHGlobal(unmanagedInput);
-                Marshal.FreeHGlobal(unmanagedOutput);
-                Marshal.FreeHGlobal(unmanagedSurfaceInput);
-            }
-
-
-            //// 分配非托管内存
-            //IntPtr unmanagedInput = Marshal.AllocHGlobal(rgba32Data.Length);
-            //Marshal.Copy(rgba32Data, 0, unmanagedInput, rgba32Data.Length);
-
-            //// 输出缓冲区也需要分配，BC1每个块压缩到1byte，每块涵盖4x4像素
-            //int blockSize = 16; // BC3压缩到16字节每4x4块
-            //int num_blocks_wide = (width + 3) / 4;
-            //int num_blocks_high = (height + 3) / 4;
-            //int blockCount = num_blocks_wide * num_blocks_high;
-            //IntPtr unmanagedOutput = Marshal.AllocHGlobal(blockCount * blockSize);
-
-            //// 创建rgba_surface实例并填充数据
-            //RgbaSurface surfaceInput = new RgbaSurface
-            //{
-            //    ptr = unmanagedInput,
-            //    width = width,
-            //    height = height,
-            //    stride = width * 4 // 4 bytes per pixel
-            //};
-
-            //// 为RgbaSurface结构体分配非托管内存，第二句：将结构体数据复制到分配的内存中
-            //IntPtr unmanagedSurfaceInput = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(RgbaSurface)));            
-            //Marshal.StructureToPtr(surfaceInput, unmanagedSurfaceInput, false);
-
-            //TextureCompression.CompressBlocksBC3(unmanagedSurfaceInput, unmanagedOutput);
+        //        Marshal.FreeHGlobal(unmanagedInput);
+        //        Marshal.FreeHGlobal(unmanagedOutput);
+        //        Marshal.FreeHGlobal(unmanagedSurfaceInput);
+        //    }
 
 
-            //var compressedTexture = new Texture2D(width, height, TextureFormat.DXT5, false);
-            //compressedTexture.name = "dxt5";
-            //// 创建一个托管数组来存储压缩数据
-            //byte[] compressedData = new byte[blockCount * blockSize];
+        //    //// 分配非托管内存
+        //    //IntPtr unmanagedInput = Marshal.AllocHGlobal(rgba32Data.Length);
+        //    //Marshal.Copy(rgba32Data, 0, unmanagedInput, rgba32Data.Length);
 
-            //// 从非托管内存复制到托管数组
-            //Marshal.Copy(unmanagedOutput, compressedData, 0, compressedData.Length);
+        //    //// 输出缓冲区也需要分配，BC1每个块压缩到1byte，每块涵盖4x4像素
+        //    //int blockSize = 16; // BC3压缩到16字节每4x4块
+        //    //int num_blocks_wide = (width + 3) / 4;
+        //    //int num_blocks_high = (height + 3) / 4;
+        //    //int blockCount = num_blocks_wide * num_blocks_high;
+        //    //IntPtr unmanagedOutput = Marshal.AllocHGlobal(blockCount * blockSize);
 
-            //// 将压缩数据加载到纹理
-            //compressedTexture.LoadRawTextureData(compressedData); //这个就是将compressedData拷贝给m_TexData.data()
-            //compressedTexture.Apply();
+        //    //// 创建rgba_surface实例并填充数据
+        //    //RgbaSurface surfaceInput = new RgbaSurface
+        //    //{
+        //    //    ptr = unmanagedInput,
+        //    //    width = width,
+        //    //    height = height,
+        //    //    stride = width * 4 // 4 bytes per pixel
+        //    //};
 
-            ////测试这张图是否成功
-            //quadMat.mainTexture = compressedTexture;
+        //    //// 为RgbaSurface结构体分配非托管内存，第二句：将结构体数据复制到分配的内存中
+        //    //IntPtr unmanagedSurfaceInput = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(RgbaSurface)));            
+        //    //Marshal.StructureToPtr(surfaceInput, unmanagedSurfaceInput, false);
+
+        //    //TextureCompression.CompressBlocksBC3(unmanagedSurfaceInput, unmanagedOutput);
 
 
-            //Marshal.FreeHGlobal(unmanagedSurfaceInput);
-            //Marshal.FreeHGlobal(unmanagedInput);
-            //Marshal.FreeHGlobal(unmanagedOutput);
+        //    //var compressedTexture = new Texture2D(width, height, TextureFormat.DXT5, false);
+        //    //compressedTexture.name = "dxt5";
+        //    //// 创建一个托管数组来存储压缩数据
+        //    //byte[] compressedData = new byte[blockCount * blockSize];
 
-            //Build to _ld and _hd files
-            if (compressedTexture.mipmapCount == 1)
-            {
-                Debug.Log("这张贴图只有一个mipmap，只会生成一个hd的二进制文件");
+        //    //// 从非托管内存复制到托管数组
+        //    //Marshal.Copy(unmanagedOutput, compressedData, 0, compressedData.Length);
 
-                byte[] highResBytes = compressedTexture.GetStreamedBinaryData(true, splitMipLevel);
-                string folderPath = Path.Combine(Application.streamingAssetsPath, "BuildTextureBytes");
-                if (!Directory.Exists(folderPath))
-                {
-                    Directory.CreateDirectory(folderPath);
-                }
-                else
-                {
-                    DirectoryInfo di = new DirectoryInfo(folderPath);
-                    foreach (FileInfo file in di.GetFiles())
-                    {
-                        file.Delete();
-                    }
-                }
-                string highResFilePath = Path.Combine(folderPath, compressedTexture.name + "_hd.bytes");
+        //    //// 将压缩数据加载到纹理
+        //    //compressedTexture.LoadRawTextureData(compressedData); //这个就是将compressedData拷贝给m_TexData.data()
+        //    //compressedTexture.Apply();
 
-                File.WriteAllBytes(highResFilePath, highResBytes);
-            }
-            else if (compressedTexture.mipmapCount < splitMipLevel + 2)
-            {
-                Debug.Log("要分离的splitMipLevel不是介于这张纹理的中间，请减少splitMipLevel后再分离，此次只会生成一个hd的二进制文件");
+        //    ////测试这张图是否成功
+        //    //quadMat.mainTexture = compressedTexture;
 
-                byte[] highResBytes = compressedTexture.GetStreamedBinaryData(true, splitMipLevel);
-                string folderPath = Path.Combine(Application.streamingAssetsPath, "BuildTextureBytes");
-                if (!Directory.Exists(folderPath))
-                {
-                    Directory.CreateDirectory(folderPath);
-                }
-                else
-                {
-                    DirectoryInfo di = new DirectoryInfo(folderPath);
-                    foreach (FileInfo file in di.GetFiles())
-                    {
-                        file.Delete();
-                    }
-                }
-                string highResFilePath = Path.Combine(folderPath, compressedTexture.name + "_hd.bytes");
 
-                File.WriteAllBytes(highResFilePath, highResBytes);
-            }
-            else
-            {
-                byte[] lowResBytes = compressedTexture.GetStreamedBinaryData(false, splitMipLevel);
-                byte[] highResBytes = compressedTexture.GetStreamedBinaryData(true, splitMipLevel);
+        //    //Marshal.FreeHGlobal(unmanagedSurfaceInput);
+        //    //Marshal.FreeHGlobal(unmanagedInput);
+        //    //Marshal.FreeHGlobal(unmanagedOutput);
 
-                string folderPath = Path.Combine(Application.streamingAssetsPath, "BuildTextureBytes");
-                if (!Directory.Exists(folderPath))
-                {
-                    Directory.CreateDirectory(folderPath);
-                }
-                else
-                {
-                    DirectoryInfo di = new DirectoryInfo(folderPath);
-                    foreach (FileInfo file in di.GetFiles())
-                    {
-                        file.Delete();
-                    }
-                }
-                string lowResFilePath = Path.Combine(folderPath, compressedTexture.name + "_ld.bytes");
-                string highResFilePath = Path.Combine(folderPath, compressedTexture.name + "_hd.bytes");
+        //    //Build to _ld and _hd files
+        //    if (compressedTexture.mipmapCount == 1)
+        //    {
+        //        Debug.Log("这张贴图只有一个mipmap，只会生成一个hd的二进制文件");
 
-                File.WriteAllBytes(lowResFilePath, lowResBytes);
-                File.WriteAllBytes(highResFilePath, highResBytes);
-            }
-        }
+        //        byte[] highResBytes = compressedTexture.GetStreamedBinaryData(true, splitMipLevel);
+        //        string folderPath = Path.Combine(Application.streamingAssetsPath, "BuildTextureBytes");
+        //        if (!Directory.Exists(folderPath))
+        //        {
+        //            Directory.CreateDirectory(folderPath);
+        //        }
+        //        else
+        //        {
+        //            DirectoryInfo di = new DirectoryInfo(folderPath);
+        //            foreach (FileInfo file in di.GetFiles())
+        //            {
+        //                file.Delete();
+        //            }
+        //        }
+        //        string highResFilePath = Path.Combine(folderPath, compressedTexture.name + "_hd.bytes");
+
+        //        File.WriteAllBytes(highResFilePath, highResBytes);
+        //    }
+        //    else if (compressedTexture.mipmapCount < splitMipLevel + 2)
+        //    {
+        //        Debug.Log("要分离的splitMipLevel不是介于这张纹理的中间，请减少splitMipLevel后再分离，此次只会生成一个hd的二进制文件");
+
+        //        byte[] highResBytes = compressedTexture.GetStreamedBinaryData(true, splitMipLevel);
+        //        string folderPath = Path.Combine(Application.streamingAssetsPath, "BuildTextureBytes");
+        //        if (!Directory.Exists(folderPath))
+        //        {
+        //            Directory.CreateDirectory(folderPath);
+        //        }
+        //        else
+        //        {
+        //            DirectoryInfo di = new DirectoryInfo(folderPath);
+        //            foreach (FileInfo file in di.GetFiles())
+        //            {
+        //                file.Delete();
+        //            }
+        //        }
+        //        string highResFilePath = Path.Combine(folderPath, compressedTexture.name + "_hd.bytes");
+
+        //        File.WriteAllBytes(highResFilePath, highResBytes);
+        //    }
+        //    else
+        //    {
+        //        byte[] lowResBytes = compressedTexture.GetStreamedBinaryData(false, splitMipLevel);
+        //        byte[] highResBytes = compressedTexture.GetStreamedBinaryData(true, splitMipLevel);
+
+        //        string folderPath = Path.Combine(Application.streamingAssetsPath, "BuildTextureBytes");
+        //        if (!Directory.Exists(folderPath))
+        //        {
+        //            Directory.CreateDirectory(folderPath);
+        //        }
+        //        else
+        //        {
+        //            DirectoryInfo di = new DirectoryInfo(folderPath);
+        //            foreach (FileInfo file in di.GetFiles())
+        //            {
+        //                file.Delete();
+        //            }
+        //        }
+        //        string lowResFilePath = Path.Combine(folderPath, compressedTexture.name + "_ld.bytes");
+        //        string highResFilePath = Path.Combine(folderPath, compressedTexture.name + "_hd.bytes");
+
+        //        File.WriteAllBytes(lowResFilePath, lowResBytes);
+        //        File.WriteAllBytes(highResFilePath, highResBytes);
+        //    }
+        //}
     }
 
     // 加载并转换图像为Texture2D

@@ -46,8 +46,8 @@ public class AssetBundleLoader : MonoBehaviour
             //    insteadABMat.mainTexture = placeholderTex;
             //}
 
-            NativeArray<byte> bytes = Texture2D.ReadTextureDataFromFile2(path, 5, placeholderTex);//placeholderTex必须之前加载过，有descriptor
-            placeholderTex.ForceSetMipLevel4(5, bytes);
+            NativeArray<byte> bytes = Texture2D.ReadTextureDataFromFile(path, 5, placeholderTex);//placeholderTex必须之前加载过，有descriptor
+            placeholderTex.ForceSetMipLevel(5, bytes);
         }
 
         if (Input.GetKeyDown(KeyCode.L))
@@ -80,16 +80,16 @@ public class AssetBundleLoader : MonoBehaviour
             string path = Path.Combine(Application.streamingAssetsPath, "TextureBytes", "Amazing Speed_Floor_D_hd.bytes");
             --m_loadMipmapLevel;
             //必需已经创建过了placeholderTex
-            var nativeArray = Texture2D.ReadTextureDataFromFile2(path, m_loadMipmapLevel,placeholderTex);
-            placeholderTex.ForceSetMipLevel4(m_loadMipmapLevel, nativeArray);
+            var nativeArray = Texture2D.ReadTextureDataFromFile(path, m_loadMipmapLevel,placeholderTex);
+            placeholderTex.ForceSetMipLevel(m_loadMipmapLevel, nativeArray);
         }
         if (Input.GetKeyDown(KeyCode.DownArrow))
         {
             string path = Path.Combine(Application.streamingAssetsPath, "TextureBytes", "Amazing Speed_Floor_D_hd.bytes");
             ++m_loadMipmapLevel;
             //必需已经创建过了placeholderTex
-            var nativeArray = Texture2D.ReadTextureDataFromFile2(path, m_loadMipmapLevel, placeholderTex);
-            placeholderTex.ForceSetMipLevel4(m_loadMipmapLevel, nativeArray);
+            var nativeArray = Texture2D.ReadTextureDataFromFile(path, m_loadMipmapLevel, placeholderTex);
+            placeholderTex.ForceSetMipLevel(m_loadMipmapLevel, nativeArray);
         }
     }
 }

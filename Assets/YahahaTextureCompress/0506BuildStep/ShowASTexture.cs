@@ -9,11 +9,12 @@ using UnityEditor;
 
 public class ShowASTexture : MonoBehaviour
 {
-    public Material quadMat;
+    public Material showMat;
     public Object asObject;
 
     private Texture2D placeholderTex;
 
+#if UNITY_EDITOR
     private void OnEnable()
     {
         if (asObject == null)
@@ -28,11 +29,12 @@ public class ShowASTexture : MonoBehaviour
         if (placeholderTex == null)
         {
             placeholderTex = new Texture2D(8, 8);
-            quadMat.mainTexture = placeholderTex;
+            showMat.mainTexture = placeholderTex;
         }
 
         NativeArray<byte> hdBytes = Texture2D.ReadTextureDataFromFile(fullPath);
         if (hdBytes.Length > 0)
             placeholderTex.SetStreamedBinaryData(hdBytes);
     }
+#endif
 }
