@@ -27,7 +27,7 @@ public class AssetBundleLoader100 : MonoBehaviour
     private List<Texture2D> textures = new List<Texture2D>();
     public Transform parent;
 
-    private int MAX_BYTES_PER_FRAME = 16 * 1024 * 1024;
+    private int MAX_BYTES_PER_FRAME;
 
     private void Start()
     {
